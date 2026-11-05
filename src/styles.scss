@@ -1,0 +1,22 @@
+/*
+ * Estilos globales de la app del Cliente.
+ * Los colores salen de `src/app/compartido/presentacion/tema/colores.css` (variables --cs-*).
+ */
+
+body {
+  margin: 0;
+  font-family: var(--ion-font-family, system-ui, sans-serif);
+}
+
+/* RNF-10: controles táctiles de al menos 48 dp. */
+.p-button,
+.p-inputtext,
+.p-select,
+.p-listbox-option,
+.p-menu-item-link {
+  min-height: var(--cs-control-minimo);
+}
+
+.p-button.p-button-icon-only {
+  min-width: var(--cs-control-minimo);
+}

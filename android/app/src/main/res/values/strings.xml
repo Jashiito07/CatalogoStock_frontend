@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CatálogoStock</string>
+    <string name="title_activity_main">CatálogoStock</string>
+    <string name="package_name">ec.edu.espam.catalogostock</string>
+    <string name="custom_url_scheme">ec.edu.espam.catalogostock</string>
+</resources>

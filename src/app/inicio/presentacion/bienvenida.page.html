@@ -1,0 +1,42 @@
+<ion-content>
+  <main class="bienvenida">
+    <header class="bienvenida__encabezado">
+      <h1 class="logo">Catálogo<span class="logo__resalte">Stock</span></h1>
+      <p-badge value="Nuevo" severity="warn" />
+    </header>
+
+    <p-card
+      header="¡Te damos la bienvenida!"
+      subheader="Compra por catálogo, incluso sin conexión."
+    >
+      <p class="bienvenida__texto">
+        Explora productos de Yanbal, Avon, L'Bel y otras marcas, arma tu carrito y envía tu
+        pedido a tu vendedora o vendedor.
+      </p>
+
+      <div class="bienvenida__estado" aria-live="polite">
+        <p-tag [severity]="etiquetaEstado().severidad" [value]="etiquetaEstado().texto" />
+      </div>
+
+      <ng-template #footer>
+        <div class="bienvenida__acciones">
+          <button pButton type="button" [fluid]="true" (click)="alPulsarComprobar()">
+            <i class="pi pi-database" aria-hidden="true"></i>
+            Comprobar base local
+          </button>
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            [outlined]="true"
+            [fluid]="true"
+            (click)="mostrarProximamente()"
+          >
+            <i class="pi pi-th-large" aria-hidden="true"></i>
+            Ver catálogo
+          </button>
+        </div>
+      </ng-template>
+    </p-card>
+  </main>
+</ion-content>
