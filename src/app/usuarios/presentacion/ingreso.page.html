@@ -1,0 +1,87 @@
+<ion-content>
+  <main class="cs-pagina">
+    <header>
+      <h1 class="cs-titulo">Iniciar sesión</h1>
+      <p class="cs-ayuda">Ingresa con el correo y la clave de tu cuenta.</p>
+    </header>
+
+    @if (aviso(); as avisoActual) {
+      <p-message [severity]="avisoActual.severidad" role="status">{{ avisoActual.texto }}</p-message>
+    }
+
+    <p-card>
+      <form class="cs-formulario" [formGroup]="formulario" (ngSubmit)="ingresar()" novalidate>
+        <div class="cs-campo">
+          <label for="ingreso-correo">Correo</label>
+          <input
+            pInputText
+            id="ingreso-correo"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            formControlName="correo"
+            [fluid]="true"
+            [invalid]="!!errorDe('correo')"
+            [attr.aria-describedby]="errorDe('correo') ? 'ingreso-correo-error' : null"
+          />
+          @if (errorDe('correo'); as mensaje) {
+            <p-message id="ingreso-correo-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="ingreso-clave">Clave</label>
+          <p-inputgroup>
+            <input
+              pInputPassword
+              id="ingreso-clave"
+              autocomplete="current-password"
+              formControlName="clave"
+              [mask]="claveOculta()"
+              [invalid]="!!errorDe('clave')"
+              [attr.aria-describedby]="errorDe('clave') ? 'ingreso-clave-error' : null"
+            />
+            <button
+              pButton
+              type="button"
+              severity="secondary"
+              [outlined]="true"
+              [iconOnly]="true"
+              [attr.aria-label]="claveOculta() ? 'Mostrar clave' : 'Ocultar clave'"
+              [attr.aria-pressed]="!claveOculta()"
+              (click)="claveOculta.set(!claveOculta())"
+            >
+              <i class="pi" [class.pi-eye]="claveOculta()" [class.pi-eye-slash]="!claveOculta()" aria-hidden="true"></i>
+            </button>
+          </p-inputgroup>
+          @if (errorDe('clave'); as mensaje) {
+            <p-message id="ingreso-clave-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        @if (errorGeneral(); as mensaje) {
+          <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+        }
+
+        <div class="cs-acciones">
+          <button pButton type="submit" [fluid]="true" [loading]="enviando()" [disabled]="enviando()">
+            <i class="pi pi-sign-in" aria-hidden="true"></i>
+            Iniciar sesión
+          </button>
+          <a pButton routerLink="/registro" severity="secondary" [text]="true" [fluid]="true">
+            ¿No tienes cuenta? Crear cuenta
+          </a>
+        </div>
+      </form>
+    </p-card>
+
+    <!-- D-01: el Vendedor administra desde el panel web, no desde la app. -->
+    <p-message severity="info" icon="pi pi-briefcase">
+      ¿Eres el vendedor? Administra tu negocio desde el panel web
+    </p-message>
+  </main>
+</ion-content>

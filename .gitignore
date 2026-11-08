@@ -53,6 +53,9 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Configuración local de red (IP de la PC para el APK de desarrollo; ver README)
+src/environments/environment.red-local.ts
+
 # Android (Capacitor)
 android/app/build
 android/build

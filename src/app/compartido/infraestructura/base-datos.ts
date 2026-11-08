@@ -10,12 +10,16 @@ import {
 } from '../aplicacion/puertos/base-datos-local.puerto';
 import { aplicarMigraciones } from './migraciones/aplicar-migraciones';
 import { MIGRACIONES_LOCALES } from './migraciones/migraciones-locales';
+import { conTiempoLimite } from './tiempo-limite';
 
 /** Nombre de la base local del dispositivo. */
 export const NOMBRE_BASE_DATOS = 'catalogostock';
 
 /** Ruta donde Angular copia `sql-wasm.wasm` para el soporte web (jeep-sqlite). */
 const RUTA_WASM_WEB = '/assets';
+
+/** Tiempo máximo para abrir la base y migrarla antes de darla por no disponible. */
+export const TIEMPO_LIMITE_INICIO_MS = 10_000;
 
 /**
  * Servicio único de SQLite de la app del Cliente.
@@ -33,9 +37,18 @@ export class BaseDatosSqlite implements BaseDatosLocal {
   private conexion: SQLiteDBConnection | null = null;
   private inicializacion: Promise<void> | null = null;
 
+  /**
+   * Abre la base y aplica las migraciones una sola vez. Si no termina en
+   * `TIEMPO_LIMITE_INICIO_MS` (por ejemplo, el WebAssembly de SQLite web aborta sin
+   * rechazar la promesa), se rechaza con un error claro y se permite reintentar.
+   */
   iniciar(): Promise<void> {
     if (!this.inicializacion) {
-      this.inicializacion = this.abrirYMigrar().catch((error: unknown) => {
+      this.inicializacion = conTiempoLimite(
+        this.abrirYMigrar(),
+        TIEMPO_LIMITE_INICIO_MS,
+        'La base de datos local no respondió a tiempo.',
+      ).catch((error: unknown) => {
         // Permite reintentar si la apertura falló (por ejemplo, almacenamiento lleno).
         this.inicializacion = null;
         throw error;
@@ -64,7 +77,8 @@ export class BaseDatosSqlite implements BaseDatosLocal {
     return this.conexion;
   }
 
-  private async abrirYMigrar(): Promise<void> {
+  /** Protegido solo para poder simular una apertura colgada en las pruebas. */
+  protected async abrirYMigrar(): Promise<void> {
     if (this.esWeb) {
       await this.prepararWeb();
     }

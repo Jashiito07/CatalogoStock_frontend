@@ -1,0 +1,240 @@
+<ion-content>
+  <main class="cs-pagina">
+    <header>
+      <h1 class="cs-titulo">Crear cuenta</h1>
+      <p class="cs-ayuda">Completa tus datos para comprar por catálogo.</p>
+    </header>
+
+    <p-card>
+      <form class="cs-formulario" [formGroup]="formulario" (ngSubmit)="registrar()" novalidate>
+        <div class="cs-campo">
+          <label for="registro-nombre">Nombre</label>
+          <input
+            pInputText
+            id="registro-nombre"
+            autocomplete="name"
+            formControlName="nombre"
+            [fluid]="true"
+            [invalid]="!!errorDe('nombre')"
+            [attr.aria-describedby]="errorDe('nombre') ? 'registro-nombre-error' : null"
+          />
+          @if (errorDe('nombre'); as mensaje) {
+            <p-message id="registro-nombre-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="registro-correo">Correo</label>
+          <input
+            pInputText
+            id="registro-correo"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            formControlName="correo"
+            [fluid]="true"
+            [invalid]="!!errorDe('correo')"
+            [attr.aria-describedby]="errorDe('correo') ? 'registro-correo-error' : null"
+          />
+          @if (errorDe('correo'); as mensaje) {
+            <p-message id="registro-correo-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="registro-telefono">Celular</label>
+          <input
+            pInputText
+            id="registro-telefono"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel-national"
+            placeholder="0991234567"
+            formControlName="telefono"
+            [fluid]="true"
+            [invalid]="!!errorDe('telefono')"
+            aria-describedby="registro-telefono-ayuda"
+          />
+          <p id="registro-telefono-ayuda" class="cs-ayuda">
+            Celular de Ecuador. Lo usaremos para coordinar tus pedidos por WhatsApp.
+          </p>
+          @if (errorDe('telefono'); as mensaje) {
+            <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="registro-clave">Clave</label>
+          <p-inputgroup>
+            <input
+              pInputPassword
+              id="registro-clave"
+              autocomplete="new-password"
+              formControlName="clave"
+              [mask]="claveOculta()"
+              [invalid]="!!errorDe('clave')"
+              aria-describedby="registro-clave-ayuda"
+            />
+            <button
+              pButton
+              type="button"
+              severity="secondary"
+              [outlined]="true"
+              [iconOnly]="true"
+              [attr.aria-label]="claveOculta() ? 'Mostrar claves' : 'Ocultar claves'"
+              [attr.aria-pressed]="!claveOculta()"
+              (click)="claveOculta.set(!claveOculta())"
+            >
+              <i class="pi" [class.pi-eye]="claveOculta()" [class.pi-eye-slash]="!claveOculta()" aria-hidden="true"></i>
+            </button>
+          </p-inputgroup>
+          <p id="registro-clave-ayuda" class="cs-ayuda">
+            De 8 a 72 caracteres, con al menos una letra y un número.
+          </p>
+          @if (errorDe('clave'); as mensaje) {
+            <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="registro-confirmacion">Confirma tu clave</label>
+          <input
+            pInputPassword
+            id="registro-confirmacion"
+            autocomplete="new-password"
+            formControlName="confirmacionClave"
+            [mask]="claveOculta()"
+            [fluid]="true"
+            [invalid]="!!errorDe('confirmacionClave')"
+            [attr.aria-describedby]="errorDe('confirmacionClave') ? 'registro-confirmacion-error' : null"
+          />
+          @if (errorDe('confirmacionClave'); as mensaje) {
+            <p-message id="registro-confirmacion-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        <!-- RNF-16 / PA-12: aceptación del aviso de privacidad. -->
+        <div class="cs-campo">
+          <div class="cs-casilla">
+            <p-checkbox
+              inputId="registro-privacidad"
+              formControlName="aceptaPrivacidad"
+              [binary]="true"
+              [invalid]="!!errorDe('aceptaPrivacidad')"
+            />
+            <label for="registro-privacidad">He leído y acepto el aviso de privacidad</label>
+          </div>
+          @let aviso = estadoAviso();
+          @if (aviso.tipo === 'cargando') {
+            <p class="cs-ayuda registro__cargando" role="status">
+              <p-progress-spinner strokeWidth="6" styleClass="registro__spinner" ariaLabel="Cargando" />
+              Cargando el aviso de privacidad…
+            </p>
+          } @else if (aviso.tipo === 'error') {
+            <p-message severity="warn">
+              <div class="registro__error-aviso">
+                <span>{{ aviso.mensaje }}</span>
+                <button pButton type="button" severity="secondary" [outlined]="true" (click)="cargarAviso()">
+                  <i class="pi pi-refresh" aria-hidden="true"></i>
+                  Reintentar
+                </button>
+              </div>
+            </p-message>
+          } @else {
+            <button pButton type="button" [link]="true" class="registro__enlace" (click)="abrirAviso()">
+              <i class="pi pi-file" aria-hidden="true"></i>
+              Leer el aviso de privacidad
+            </button>
+          }
+          @if (errorDe('aceptaPrivacidad'); as mensaje) {
+            <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+          }
+        </div>
+
+        @if (errorGeneral(); as mensaje) {
+          <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+        }
+
+        <div class="cs-acciones">
+          <button
+            pButton
+            type="submit"
+            [fluid]="true"
+            [loading]="enviando()"
+            [disabled]="enviando() || estadoAviso().tipo !== 'listo'"
+          >
+            <i class="pi pi-user-plus" aria-hidden="true"></i>
+            Crear cuenta
+          </button>
+          <a pButton routerLink="/ingreso" severity="secondary" [text]="true" [fluid]="true">
+            ¿Ya tienes cuenta? Iniciar sesión
+          </a>
+        </div>
+      </form>
+    </p-card>
+  </main>
+</ion-content>
+
+@let estado = estadoAviso();
+@if (estado.tipo === 'listo') {
+    <p-dialog
+      [visible]="dialogoAvisoVisible()"
+      (visibleChange)="dialogoAvisoVisible.set($event)"
+      [header]="estado.resultado.aviso.titulo"
+      [modal]="true"
+      [draggable]="false"
+      [dismissableMask]="true"
+      [style]="{ width: '95vw', maxWidth: '40rem' }"
+      closeAriaLabel="Cerrar"
+    >
+      @if (estado.resultado.desdeCache) {
+        <p-message severity="info" styleClass="registro__nota-cache">
+          Sin conexión: se muestra la última versión guardada del aviso.
+        </p-message>
+      }
+      <!-- El texto se pinta como texto (sin innerHTML): no se puede inyectar código. -->
+      <article class="registro__aviso">
+        @for (bloque of bloquesAviso(); track $index) {
+          @if (bloque.tipo === 'titulo') {
+            <h2 [class.registro__aviso-subtitulo]="bloque.nivel > 1">
+              @for (s of bloque.segmentos; track $index) {
+                @if (s.negrita) { <strong>{{ s.texto }}</strong> } @else { {{ s.texto }} }
+              }
+            </h2>
+          } @else if (bloque.tipo === 'lista') {
+            <ul>
+              @for (elemento of bloque.elementos; track $index) {
+                <li>
+                  @for (s of elemento; track $index) {
+                    @if (s.negrita) { <strong>{{ s.texto }}</strong> } @else { {{ s.texto }} }
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>
+              @for (s of bloque.segmentos; track $index) {
+                @if (s.negrita) { <strong>{{ s.texto }}</strong> } @else { {{ s.texto }} }
+              }
+            </p>
+          }
+        }
+        <p class="cs-ayuda">Versión {{ estado.resultado.aviso.version }}</p>
+      </article>
+      <ng-template #footer>
+        <button pButton type="button" severity="secondary" [outlined]="true" (click)="dialogoAvisoVisible.set(false)">
+          Cerrar
+        </button>
+        <button pButton type="button" (click)="aceptarAviso()">
+          <i class="pi pi-check" aria-hidden="true"></i>
+          Acepto
+        </button>
+      </ng-template>
+    </p-dialog>
+}

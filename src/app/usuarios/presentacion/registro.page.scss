@@ -1,0 +1,43 @@
+.registro__cargando {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--cs-control-minimo);
+}
+
+:host ::ng-deep .registro__spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.registro__error-aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.registro__enlace {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+
+.registro__aviso {
+  line-height: 1.5;
+
+  h2 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.25rem;
+    color: var(--cs-primario);
+  }
+
+  .registro__aviso-subtitulo {
+    font-size: 1.05rem;
+    color: var(--cs-texto);
+  }
+
+  p,
+  ul {
+    margin: 0 0 0.75rem;
+  }
+}

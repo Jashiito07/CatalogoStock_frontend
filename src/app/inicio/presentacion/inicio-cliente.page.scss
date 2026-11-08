@@ -1,0 +1,38 @@
+.inicio__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cs-primario);
+}
+
+.logo__resalte {
+  color: var(--cs-secundario);
+}
+
+.inicio__saludo {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  color: var(--cs-primario);
+}
+
+.inicio__nombre {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.inicio__nombre + .cs-ayuda {
+  margin-bottom: 0.75rem;
+}
+
+.inicio__texto {
+  margin: 0;
+  line-height: 1.5;
+}
