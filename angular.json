@@ -75,6 +75,17 @@
                   "with": "src/environments/environment.development.ts"
                 }
               ]
+            },
+            "red-local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.red-local.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

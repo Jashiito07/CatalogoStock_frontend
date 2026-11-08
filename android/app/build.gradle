@@ -44,6 +44,23 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
+// RNF-01: un APK o AAB release nunca permite HTTP sin cifrar. La configuración de red
+// local (CS_RED_LOCAL=1, ver README) es solo para depuración: si quedó sincronizada,
+// la compilación release falla hasta ejecutar `npm run build` y `npx cap sync android`.
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    doFirst {
+        def configuracion = file('src/main/assets/capacitor.config.json')
+        if (configuracion.exists()) {
+            def texto = configuracion.getText('UTF-8')
+            if (texto =~ /"cleartext"\s*:\s*true/ || texto =~ /"androidScheme"\s*:\s*"http"/) {
+                throw new GradleException(
+                    'La configuración de red local (HTTP sin cifrar) no se permite en release. ' +
+                    'Ejecuta "npm run build" y "npx cap sync android" antes de compilar.')
+            }
+        }
+    }
+}
+
 try {
     def servicesJSON = file('google-services.json')
     if (servicesJSON.text) {

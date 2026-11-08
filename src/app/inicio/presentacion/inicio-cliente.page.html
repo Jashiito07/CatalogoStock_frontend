@@ -1,0 +1,44 @@
+<ion-content>
+  <main class="cs-pagina">
+    <header class="inicio__encabezado">
+      <span class="logo">Catálogo<span class="logo__resalte">Stock</span></span>
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        [outlined]="true"
+        [loading]="cerrando()"
+        [disabled]="cerrando()"
+        (click)="confirmarCierre()"
+      >
+        <i class="pi pi-sign-out" aria-hidden="true"></i>
+        Cerrar sesión
+      </button>
+    </header>
+
+    @if (!enLinea()) {
+      <!-- D-10 / RN-07: sin conexión se usan los datos guardados, que no son definitivos. -->
+      <p-message severity="warn" icon="pi pi-wifi" role="status">
+        Sin conexión: estás usando los datos guardados en este dispositivo (no definitivos).
+      </p-message>
+    }
+
+    <p-card>
+      <h1 class="inicio__saludo">{{ saludo() }}</h1>
+      @if (usuario(); as datos) {
+        <p class="inicio__nombre">{{ datos.nombre }}</p>
+        <p class="cs-ayuda">{{ datos.correo }}</p>
+        <p-tag value="Cliente" severity="secondary" />
+      }
+    </p-card>
+
+    <p-card header="Catálogo" subheader="Muy pronto">
+      <p class="inicio__texto">
+        Aquí podrás explorar los productos de Yanbal, Avon, L'Bel y otras marcas, incluso sin
+        conexión.
+      </p>
+    </p-card>
+  </main>
+</ion-content>
+
+<p-confirmdialog />

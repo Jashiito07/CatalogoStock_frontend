@@ -1,4 +1,5 @@
 import { registerLocaleData } from '@angular/common';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeEsEc from '@angular/common/locales/es-EC';
 import {
   ApplicationConfig,
@@ -14,6 +15,8 @@ import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { proveerCompartido } from './compartido/compartido.providers';
 import { TemaCatalogoStock } from './compartido/presentacion/tema/tema-catalogostock';
+import { interceptorAutenticacion } from './usuarios/infraestructura/interceptor-autenticacion';
+import { proveerUsuarios } from './usuarios/usuarios.providers';
 
 registerLocaleData(localeEsEc);
 
@@ -25,6 +28,8 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular({ mode: 'md' }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideRouter(routes),
+    // Token de acceso y renovación con rotación ante TOKEN_VENCIDO (D-09).
+    provideHttpClient(withInterceptors([interceptorAutenticacion])),
     providePrimeNG({
       theme: {
         preset: TemaCatalogoStock,
@@ -36,5 +41,6 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     { provide: LOCALE_ID, useValue: 'es-EC' },
     proveerCompartido(),
+    proveerUsuarios(),
   ],
 };
