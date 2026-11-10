@@ -5,7 +5,7 @@ import { BaseDatosLocal } from './aplicacion/puertos/base-datos-local.puerto';
 import { Conectividad } from './aplicacion/puertos/conectividad.puerto';
 import { BaseDatosSqlite } from './infraestructura/base-datos';
 import { ConectividadCapacitor } from './infraestructura/conectividad-capacitor';
-import { resolverUrlApi } from './infraestructura/url-api';
+import { resolverUrlApi, resolverUrlPanel } from './infraestructura/url-api';
 
 /** Puerto de la base de datos local; los casos de uso lo reciben por inyección. */
 export const BASE_DATOS_LOCAL = new InjectionToken<BaseDatosLocal>('BASE_DATOS_LOCAL');
@@ -17,6 +17,12 @@ export const CONECTIVIDAD = new InjectionToken<Conectividad>('CONECTIVIDAD');
 export const URL_API = new InjectionToken<string>('URL_API', {
   providedIn: 'root',
   factory: () => resolverUrlApi(environment, inject(DOCUMENT).defaultView?.location ?? null),
+});
+
+/** URL del panel web del Vendedor (D-37), sin barra final. */
+export const URL_PANEL = new InjectionToken<string>('URL_PANEL', {
+  providedIn: 'root',
+  factory: () => resolverUrlPanel(environment, inject(DOCUMENT).defaultView?.location ?? null),
 });
 
 /** Asocia los puertos compartidos con sus adaptadores. */

@@ -15,4 +15,8 @@ export const environment: ConfiguracionEntorno = {
   produccion: false,
   apiUrl: 'http://192.168.X.X:3000/api/v1',
   apiEnMismoHost: false,
+  // Panel del Vendedor (`npm run start:red` en CatalogoStock_admin; D-37). En el emulador
+  // BlueStacks o el de Android Studio, la PC es `10.0.2.2`: usa `http://10.0.2.2:4201`
+  // (y `http://10.0.2.2:3000/api/v1` en `apiUrl`).
+  urlPanel: 'http://192.168.X.X:4201',
 };

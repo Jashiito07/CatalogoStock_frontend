@@ -1,12 +1,15 @@
 import {
   bytesUtf8,
   esClaveValida,
+  esCodigoRecuperacionValido,
   esCorreoValido,
   esNombreValido,
   esTelefonoValido,
   MENSAJES_VALIDACION,
   normalizarCorreo,
   normalizarTelefono,
+  validarCambioClave,
+  validarRecuperacion,
   validarRegistro,
 } from './validaciones-usuario';
 
@@ -124,5 +127,53 @@ describe('Validaciones de usuario (contrato de usuarios, RNF-03)', () => {
         clave: 'La clave debe tener entre 8 y 72 caracteres, con letras y números.',
       });
     });
+  });
+});
+
+describe('Validaciones de recuperación y cambio de clave (RF-USU-05, D-39)', () => {
+  it('el código de recuperación tiene exactamente 6 dígitos (ignora espacios)', () => {
+    expect(esCodigoRecuperacionValido('482913')).toBe(true);
+    expect(esCodigoRecuperacionValido('000000')).toBe(true);
+    expect(esCodigoRecuperacionValido(' 482 913 ')).toBe(true);
+    expect(esCodigoRecuperacionValido('48291')).toBe(false);
+    expect(esCodigoRecuperacionValido('4829134')).toBe(false);
+    expect(esCodigoRecuperacionValido('48291a')).toBe(false);
+    expect(esCodigoRecuperacionValido('')).toBe(false);
+  });
+
+  it('recuperación: mismas reglas de la clave que el registro (D-22)', () => {
+    expect(
+      validarRecuperacion({
+        correo: 'maria@correo.com',
+        codigo: '482913',
+        claveNueva: 'NuevaClave2026',
+        confirmacionClave: 'NuevaClave2026',
+      }),
+    ).toEqual({});
+    expect(
+      validarRecuperacion({
+        correo: 'maria@correo.com',
+        codigo: '482913',
+        claveNueva: 'ñ'.repeat(37) + '1',
+        confirmacionClave: 'ñ'.repeat(37) + '1',
+      }),
+    ).toEqual({ claveNueva: MENSAJES_VALIDACION.clave });
+  });
+
+  it('cambio: la clave nueva debe ser distinta de la actual', () => {
+    expect(
+      validarCambioClave({
+        claveActual: 'Catalogo2026',
+        claveNueva: 'Catalogo2026',
+        confirmacionClave: 'Catalogo2026',
+      }),
+    ).toEqual({ claveNueva: MENSAJES_VALIDACION.claveNuevaIgual });
+    expect(
+      validarCambioClave({
+        claveActual: 'Catalogo2026',
+        claveNueva: 'NuevaClave2026',
+        confirmacionClave: 'NuevaClave2026',
+      }),
+    ).toEqual({});
   });
 });

@@ -68,7 +68,21 @@ describe('Interceptor de autenticación (D-09, contrato README)', () => {
     await respuesta;
   });
 
-  it.each(['/autenticacion/ingreso/cliente', '/usuarios/registro', '/autenticacion/renovacion', '/privacidad/aviso'])(
+  it('RF-USU-05: el cambio de clave es protegido y lleva el token de acceso', async () => {
+    const respuesta = firstValueFrom(http.post(`${URL}/usuarios/yo/clave`, {}));
+    const solicitud = controlador.expectOne(`${URL}/usuarios/yo/clave`);
+    expect(solicitud.request.headers.get('Authorization')).toBe('Bearer acceso-1');
+    solicitud.flush(null, { status: 204, statusText: 'Sin contenido' });
+    await respuesta;
+  });
+
+  it.each([
+    '/autenticacion/ingreso/cliente',
+    '/usuarios/registro',
+    '/autenticacion/renovacion',
+    '/privacidad/aviso',
+    '/autenticacion/recuperacion',
+  ])(
     'no envía el token a la ruta pública %s',
     async (ruta) => {
       const respuesta = firstValueFrom(http.post(`${URL}${ruta}`, {}));

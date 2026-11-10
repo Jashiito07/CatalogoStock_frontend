@@ -28,6 +28,8 @@ export function crearApiFalsa(): Mocked<ApiUsuarios> {
     obtenerAvisoPrivacidad: vi.fn<ApiUsuarios['obtenerAvisoPrivacidad']>(
       async () => AVISO_DE_PRUEBA,
     ),
+    recuperarClave: vi.fn<ApiUsuarios['recuperarClave']>(async () => undefined),
+    cambiarClave: vi.fn<ApiUsuarios['cambiarClave']>(async () => undefined),
   };
 }
 

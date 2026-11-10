@@ -23,6 +23,7 @@ import { Message } from 'primeng/message';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { CODIGOS_ERROR, ErrorApi } from '../../compartido/dominio/error-api';
+import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import {
   ConsultarAvisoPrivacidad,
   ResultadoAviso,
@@ -70,6 +71,7 @@ type EstadoAviso =
   selector: 'app-registro',
   imports: [
     IonContent,
+    LogoComponent,
     ReactiveFormsModule,
     RouterLink,
     Card,

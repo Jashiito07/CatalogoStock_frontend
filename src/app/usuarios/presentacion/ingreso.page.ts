@@ -16,7 +16,9 @@ import { InputPassword } from 'primeng/inputpassword';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
 
+import { URL_PANEL } from '../../compartido/compartido.providers';
 import { ErrorApi } from '../../compartido/dominio/error-api';
+import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import { IniciarSesion } from '../aplicacion/casos-uso/iniciar-sesion.caso-uso';
 import { ErrorDatosFormulario } from '../dominio/errores';
 import { mensajeDeError, MENSAJES_ERROR } from '../dominio/mensajes-error';
@@ -28,6 +30,11 @@ import { marcarErrorServidor, mensajeDeControl, reglaDominio } from './validador
 /** Motivo con el que el registro envía aquí si la cuenta se creó pero no se pudo ingresar. */
 export const MOTIVO_CUENTA_CREADA = 'cuenta-creada';
 
+/** Motivo con el que «Recuperar clave» envía aquí tras cambiar la clave (RF-USU-05). */
+export const MOTIVO_CLAVE_RESTABLECIDA = 'clave-restablecida';
+
+export const TEXTO_CLAVE_RESTABLECIDA = 'Tu clave se cambió. Inicia sesión con tu nueva clave.';
+
 type CampoIngreso = 'correo' | 'clave';
 
 interface AvisoIngreso {
@@ -37,12 +44,14 @@ interface AvisoIngreso {
 
 /**
  * Ingreso del Cliente (RF-USU-01, CA-01). Usa solo `/autenticacion/ingreso/cliente`
- * (D-19) y muestra siempre la nota para el Vendedor (D-01).
+ * (D-19), enlaza con «Recuperar clave» (RF-USU-05) y muestra siempre el botón que abre
+ * el panel web del Vendedor en el navegador del dispositivo (D-01, D-37).
  */
 @Component({
   selector: 'app-ingreso',
   imports: [
     IonContent,
+    LogoComponent,
     ReactiveFormsModule,
     RouterLink,
     Card,
@@ -53,9 +62,12 @@ interface AvisoIngreso {
     Message,
   ],
   templateUrl: './ingreso.page.html',
+  styleUrl: './ingreso.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IngresoPage {
+  /** Panel web del Vendedor (D-37). */
+  protected readonly urlPanel = inject(URL_PANEL);
   private readonly iniciarSesion = inject(IniciarSesion);
   private readonly router = inject(Router);
   private readonly mensajes = inject(MessageService);
@@ -130,6 +142,9 @@ export class IngresoPage {
     }
     if (motivo === MOTIVO_CUENTA_CREADA) {
       return { severidad: 'success', texto: 'Tu cuenta se creó. Inicia sesión para continuar.' };
+    }
+    if (motivo === MOTIVO_CLAVE_RESTABLECIDA) {
+      return { severidad: 'success', texto: TEXTO_CLAVE_RESTABLECIDA };
     }
     return null;
   }

@@ -1,6 +1,6 @@
 /**
- * Reglas de validación del registro y del ingreso (contrato de usuarios, «Validaciones»;
- * RNF-03). Son las mismas que aplica la API: la app avisa antes, pero el servidor valida
+ * Reglas de validación del registro, del ingreso y de la recuperación y el cambio de clave
+ * (contratos usuarios.md, «Validaciones», y recuperacion-clave.md; RNF-03, RF-USU-05). Son las mismas que aplica la API: la app avisa antes, pero el servidor valida
  * siempre. TypeScript puro, sin frameworks (RNF-14).
  */
 
@@ -13,6 +13,9 @@ export const MENSAJES_VALIDACION = {
   aceptaPrivacidad: 'Debe aceptar el aviso de privacidad para crear su cuenta.',
   correoIngreso: 'Ingrese su correo.',
   claveIngreso: 'Ingrese su clave.',
+  codigoRecuperacion: 'El código tiene 6 dígitos.',
+  claveActual: 'Ingrese su clave actual.',
+  claveNuevaIgual: 'La clave nueva debe ser distinta de la actual.',
 } as const;
 
 export const LONGITUD_MINIMA_NOMBRE = 2;
@@ -122,6 +125,74 @@ export function validarRegistro(
   }
   if (datos.aceptaPrivacidad !== true) {
     errores.aceptaPrivacidad = MENSAJES_VALIDACION.aceptaPrivacidad;
+  }
+  return errores;
+}
+
+/** Código de recuperación (RF-USU-05, D-39): exactamente 6 dígitos. */
+const FORMATO_CODIGO_RECUPERACION = /^\d{6}$/u;
+
+/** Quita los espacios que el Cliente pueda copiar junto con el código. */
+export function normalizarCodigoRecuperacion(codigo: string): string {
+  return codigo.replace(/\s/gu, '');
+}
+
+export function esCodigoRecuperacionValido(codigo: string): boolean {
+  return FORMATO_CODIGO_RECUPERACION.test(normalizarCodigoRecuperacion(codigo));
+}
+
+export interface DatosFormularioRecuperacion {
+  readonly correo: string;
+  readonly codigo: string;
+  readonly claveNueva: string;
+  readonly confirmacionClave: string;
+}
+
+export type CampoRecuperacion = keyof DatosFormularioRecuperacion;
+
+/**
+ * Errores por campo de «Recuperar clave» (contrato recuperacion-clave.md,
+ * `POST /autenticacion/recuperacion`); vacío si todo es válido.
+ */
+export function validarRecuperacion(
+  datos: DatosFormularioRecuperacion,
+): Partial<Record<CampoRecuperacion, string>> {
+  const errores: Partial<Record<CampoRecuperacion, string>> = {};
+  if (!esCorreoValido(datos.correo)) errores.correo = MENSAJES_VALIDACION.correo;
+  if (!esCodigoRecuperacionValido(datos.codigo)) {
+    errores.codigo = MENSAJES_VALIDACION.codigoRecuperacion;
+  }
+  if (!esClaveValida(datos.claveNueva)) errores.claveNueva = MENSAJES_VALIDACION.clave;
+  if (datos.confirmacionClave !== datos.claveNueva) {
+    errores.confirmacionClave = MENSAJES_VALIDACION.confirmacionClave;
+  }
+  return errores;
+}
+
+export interface DatosFormularioCambioClave {
+  readonly claveActual: string;
+  readonly claveNueva: string;
+  readonly confirmacionClave: string;
+}
+
+export type CampoCambioClave = keyof DatosFormularioCambioClave;
+
+/**
+ * Errores por campo de «Cambiar mi clave» (contrato recuperacion-clave.md,
+ * `POST /usuarios/yo/clave`): la clave nueva cumple las reglas y es distinta de la actual.
+ */
+export function validarCambioClave(
+  datos: DatosFormularioCambioClave,
+): Partial<Record<CampoCambioClave, string>> {
+  const errores: Partial<Record<CampoCambioClave, string>> = {};
+  if (datos.claveActual.length === 0) errores.claveActual = MENSAJES_VALIDACION.claveActual;
+  if (!esClaveValida(datos.claveNueva)) {
+    errores.claveNueva = MENSAJES_VALIDACION.clave;
+  } else if (datos.claveNueva === datos.claveActual) {
+    errores.claveNueva = MENSAJES_VALIDACION.claveNuevaIgual;
+  }
+  if (datos.confirmacionClave !== datos.claveNueva) {
+    errores.confirmacionClave = MENSAJES_VALIDACION.confirmacionClave;
   }
   return errores;
 }

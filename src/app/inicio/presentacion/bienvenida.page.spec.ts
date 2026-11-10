@@ -35,7 +35,10 @@ describe('BienvenidaPage (PLAN 1.6, PA-12)', () => {
   it('muestra el logo y lleva a crear cuenta o a iniciar sesión', async () => {
     const elemento = await abrir();
 
-    expect(elemento.querySelector('h1')?.textContent).toContain('CatálogoStock');
+    // D-38: logo horizontal oficial como imagen, con el nombre como texto alternativo.
+    const logo = elemento.querySelector<HTMLImageElement>('h1 img');
+    expect(logo?.getAttribute('src')).toBe('marca/catalogostock-logo-horizontal.svg');
+    expect(logo?.alt).toBe('CatálogoStock');
     const enlaces = Array.from(elemento.querySelectorAll('a')).map((a) => ({
       texto: a.textContent?.trim(),
       destino: a.getAttribute('href'),

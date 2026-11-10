@@ -1,7 +1,7 @@
 <ion-content>
   <main class="cs-pagina">
     <header class="inicio__encabezado">
-      <span class="logo">Catálogo<span class="logo__resalte">Stock</span></span>
+      <app-logo variante="horizontal" class="inicio__logo" />
       <button
         pButton
         type="button"
@@ -30,6 +30,13 @@
         <p class="cs-ayuda">{{ datos.correo }}</p>
         <p-tag value="Cliente" severity="secondary" />
       }
+      <ng-template #footer>
+        <!-- RF-USU-05: cambio de clave con la sesión iniciada. -->
+        <a pButton routerLink="/cambiar-clave" severity="secondary" [outlined]="true" [fluid]="true">
+          <i class="pi pi-key" aria-hidden="true"></i>
+          Cambiar mi clave
+        </a>
+      </ng-template>
     </p-card>
 
     <p-card header="Catálogo" subheader="Muy pronto">

@@ -53,6 +53,18 @@ describe('InicioClientePage (PLAN 1.6, D-10)', () => {
     expect(actualizar).toHaveBeenCalled();
   });
 
+  it('RF-USU-05 / D-38: ofrece «Cambiar mi clave» y muestra el logo oficial', async () => {
+    const { elemento } = await abrir();
+
+    const enlace = Array.from(elemento.querySelectorAll('a')).find((a) =>
+      a.textContent?.includes('Cambiar mi clave'),
+    );
+    expect(enlace?.getAttribute('href')).toBe('/cambiar-clave');
+    const logo = elemento.querySelector<HTMLImageElement>('app-logo img');
+    expect(logo?.getAttribute('src')).toBe('marca/catalogostock-logo-horizontal.svg');
+    expect(logo?.alt).toBe('CatálogoStock');
+  });
+
   it('D-10 / RN-07: sin conexión avisa que los datos guardados no son definitivos', async () => {
     conectividad.conectado = false;
     const { elemento } = await abrir();

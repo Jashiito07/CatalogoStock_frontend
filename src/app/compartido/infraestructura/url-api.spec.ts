@@ -1,4 +1,4 @@
-import { resolverUrlApi } from './url-api';
+import { resolverUrlApi, resolverUrlPanel } from './url-api';
 
 const desarrollo = {
   produccion: false,
@@ -40,5 +40,36 @@ describe('URL de la API', () => {
     expect(() =>
       resolverUrlApi({ ...produccion, apiUrl: 'http://api.ejemplo.ec/api/v1' }, null),
     ).toThrow(/HTTPS/);
+  });
+});
+
+describe('URL del panel del Vendedor (D-37)', () => {
+  const entorno = { produccion: false, apiEnMismoHost: true, urlPanel: 'http://localhost:4201' };
+
+  it('en la PC usa la URL configurada, sin barra final', () => {
+    expect(resolverUrlPanel(entorno, { protocol: 'http:', hostname: 'localhost' })).toBe(
+      'http://localhost:4201',
+    );
+  });
+
+  it('en el navegador del celular usa el host que sirve la app, igual que la API', () => {
+    expect(resolverUrlPanel(entorno, { protocol: 'http:', hostname: '192.168.100.113' })).toBe(
+      'http://192.168.100.113:4201',
+    );
+  });
+
+  it('APK red-local / BlueStacks: respeta la URL configurada (10.0.2.2)', () => {
+    const redLocal = { ...entorno, apiEnMismoHost: false, urlPanel: 'http://10.0.2.2:4201' };
+    expect(resolverUrlPanel(redLocal, { protocol: 'http:', hostname: 'localhost' })).toBe(
+      'http://10.0.2.2:4201',
+    );
+  });
+
+  it('RNF-01: en producción exige HTTPS', () => {
+    const produccion = { produccion: true, apiEnMismoHost: false, urlPanel: 'https://panel.ejemplo.ec' };
+    expect(resolverUrlPanel(produccion, null)).toBe('https://panel.ejemplo.ec');
+    expect(() => resolverUrlPanel({ ...produccion, urlPanel: 'http://panel.ejemplo.ec' }, null)).toThrow(
+      /HTTPS/,
+    );
   });
 });

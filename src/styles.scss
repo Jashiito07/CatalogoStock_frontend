@@ -45,6 +45,14 @@ a.p-button {
     calc(1.5rem + env(safe-area-inset-bottom));
 }
 
+/* Encabezado con el logo oficial (D-38) sobre el título de la pantalla. */
+.cs-encabezado-marca {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
 .cs-titulo {
   margin: 0;
   font-size: 1.75rem;

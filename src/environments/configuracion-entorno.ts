@@ -13,4 +13,10 @@ export interface ConfiguracionEntorno {
    * de la PC en archivos versionados.
    */
   readonly apiEnMismoHost: boolean;
+  /**
+   * URL del panel web del Vendedor (D-37). El botón «Ir al panel del vendedor» del
+   * ingreso la abre en el navegador del dispositivo. En producción debe ser HTTPS. Si
+   * `apiEnMismoHost` está activo, el host se ajusta igual que el de la API.
+   */
+  readonly urlPanel: string;
 }

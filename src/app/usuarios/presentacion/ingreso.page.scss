@@ -1,0 +1,11 @@
+.ingreso__olvido {
+  align-self: flex-end;
+  padding-inline: 0;
+}
+
+.ingreso__vendedor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}

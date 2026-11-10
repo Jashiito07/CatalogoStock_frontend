@@ -11,4 +11,6 @@ export const environment: ConfiguracionEntorno = {
   produccion: true,
   apiUrl: 'https://api.catalogostock.local/api/v1',
   apiEnMismoHost: false,
+  // PROVISIONAL (D-37): se reemplaza por la URL HTTPS definitiva al desplegar el panel.
+  urlPanel: 'https://panel.catalogostock.local',
 };
