@@ -116,3 +116,83 @@ describe('ApiUsuariosHttp (docs/contrato-api/usuarios.md)', () => {
     await expect(promesa).rejects.toBeInstanceOf(ErrorApi);
   });
 });
+
+describe('ApiUsuariosHttp (docs/contrato-api/recuperacion-clave.md, RF-USU-05)', () => {
+  let api: ApiUsuariosHttp;
+  let controlador: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: URL_API, useValue: URL }],
+    });
+    api = TestBed.inject(ApiUsuariosHttp);
+    controlador = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => controlador.verify());
+
+  it('POST /autenticacion/recuperacion con correo, código y clave nueva → 204', async () => {
+    const solicitud = { correo: 'maria.zambrano@correo.com', codigo: '482913', claveNueva: 'NuevaClave2026' };
+    const promesa = api.recuperarClave(solicitud);
+
+    const peticion = controlador.expectOne(`${URL}/autenticacion/recuperacion`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual(solicitud);
+    peticion.flush(null, { status: 204, statusText: 'Sin contenido' });
+
+    await expect(promesa).resolves.toBeUndefined();
+  });
+
+  it('422 CODIGO_INVALIDO y 429 llegan como ErrorApi con el código del contrato', async () => {
+    const solicitud = { correo: 'maria@correo.com', codigo: '000000', claveNueva: 'NuevaClave2026' };
+    const invalido = api.recuperarClave(solicitud);
+    controlador.expectOne(`${URL}/autenticacion/recuperacion`).flush(
+      {
+        codigo: 'CODIGO_INVALIDO',
+        mensaje: 'El código no es válido o ya venció. Pide uno nuevo a tu vendedor.',
+        detalles: {},
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    await expect(invalido).rejects.toMatchObject({ estado: 422, codigo: 'CODIGO_INVALIDO' });
+
+    const limitado = api.recuperarClave(solicitud);
+    controlador.expectOne(`${URL}/autenticacion/recuperacion`).flush(
+      { codigo: 'DEMASIADAS_SOLICITUDES', mensaje: 'x', detalles: { reintentarEnSegundos: 30 } },
+      { status: 429, statusText: 'Too Many Requests' },
+    );
+    const error = await limitado.catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect((error as ErrorApi).reintentarEnSegundos).toBe(30);
+  });
+
+  it('POST /usuarios/yo/clave con clave actual, nueva y tokenRenovacionActual → 204', async () => {
+    const solicitud = {
+      claveActual: 'Catalogo2026',
+      claveNueva: 'NuevaClave2026',
+      tokenRenovacionActual: 'renovacion-1',
+    };
+    const promesa = api.cambiarClave(solicitud);
+
+    const peticion = controlador.expectOne(`${URL}/usuarios/yo/clave`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual(solicitud);
+    peticion.flush(null, { status: 204, statusText: 'Sin contenido' });
+
+    await expect(promesa).resolves.toBeUndefined();
+  });
+
+  it('422 CLAVE_ACTUAL_INCORRECTA y sin conexión', async () => {
+    const solicitud = { claveActual: 'Mala2026', claveNueva: 'NuevaClave2026' };
+    const incorrecta = api.cambiarClave(solicitud);
+    controlador.expectOne(`${URL}/usuarios/yo/clave`).flush(
+      { codigo: 'CLAVE_ACTUAL_INCORRECTA', mensaje: 'La clave actual no es correcta.', detalles: {} },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    await expect(incorrecta).rejects.toMatchObject({ codigo: 'CLAVE_ACTUAL_INCORRECTA' });
+
+    const sinRed = api.cambiarClave(solicitud);
+    controlador.expectOne(`${URL}/usuarios/yo/clave`).error(new ProgressEvent('error'), { status: 0 });
+    await expect(sinRed).rejects.toBeInstanceOf(ErrorSinConexion);
+  });
+});

@@ -16,6 +16,23 @@ export interface Credenciales {
   readonly clave: string;
 }
 
+/** Cuerpo de `POST /autenticacion/recuperacion` (recuperacion-clave.md, RF-USU-05). */
+export interface SolicitudRecuperacion {
+  readonly correo: string;
+  readonly codigo: string;
+  readonly claveNueva: string;
+}
+
+/**
+ * Cuerpo de `POST /usuarios/yo/clave` (recuperacion-clave.md). `tokenRenovacionActual`
+ * identifica la sesión que se conserva; las demás se revocan.
+ */
+export interface SolicitudCambioClave {
+  readonly claveActual: string;
+  readonly claveNueva: string;
+  readonly tokenRenovacionActual?: string;
+}
+
 export type { AvisoPrivacidad };
 
 /**
@@ -30,4 +47,8 @@ export interface ApiUsuarios {
   salir(tokenRenovacion: string): Promise<void>;
   obtenerUsuarioActual(): Promise<Usuario>;
   obtenerAvisoPrivacidad(): Promise<AvisoPrivacidad>;
+  /** Público; responde 204 (RF-USU-05). */
+  recuperarClave(solicitud: SolicitudRecuperacion): Promise<void>;
+  /** Con sesión; responde 204 (RF-USU-05). */
+  cambiarClave(solicitud: SolicitudCambioClave): Promise<void>;
 }

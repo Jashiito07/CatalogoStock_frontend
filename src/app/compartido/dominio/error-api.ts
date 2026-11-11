@@ -48,7 +48,7 @@ export class ErrorSinConexion extends Error {
   }
 }
 
-/** Códigos genéricos y de autenticación del contrato (README y usuarios.md). */
+/** Códigos genéricos y de autenticación del contrato (README, usuarios.md y recuperacion-clave.md). */
 export const CODIGOS_ERROR = {
   datosInvalidos: 'DATOS_INVALIDOS',
   credencialesInvalidas: 'CREDENCIALES_INVALIDAS',
@@ -61,5 +61,8 @@ export const CODIGOS_ERROR = {
   tokenInvalido: 'TOKEN_INVALIDO',
   noAutorizado: 'NO_AUTORIZADO',
   noEncontrado: 'NO_ENCONTRADO',
+  // recuperacion-clave.md (RF-USU-05).
+  codigoInvalido: 'CODIGO_INVALIDO',
+  claveActualIncorrecta: 'CLAVE_ACTUAL_INCORRECTA',
   errorInterno: 'ERROR_INTERNO',
 } as const;

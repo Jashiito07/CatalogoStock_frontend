@@ -56,3 +56,23 @@ describe('Mensajes de error en español (contrato de usuarios)', () => {
     ]);
   });
 });
+
+describe('Mensajes de recuperación y cambio de clave (RF-USU-05)', () => {
+  it('422 CODIGO_INVALIDO → mensaje único del contrato, sin revelar el motivo', () => {
+    expect(mensajeDeError(new ErrorApi(422, 'CODIGO_INVALIDO', 'x'), 'clave')).toBe(
+      'El código no es válido o ya venció. Pide uno nuevo a tu vendedor.',
+    );
+  });
+
+  it('422 CLAVE_ACTUAL_INCORRECTA → «La clave actual no es correcta.»', () => {
+    expect(mensajeDeError(new ErrorApi(422, 'CLAVE_ACTUAL_INCORRECTA', 'x'), 'clave')).toBe(
+      'La clave actual no es correcta.',
+    );
+  });
+
+  it('sin conexión → «Necesitas conexión para cambiar tu clave.»', () => {
+    expect(mensajeDeError(new ErrorSinConexion(), 'clave')).toBe(
+      'Necesitas conexión para cambiar tu clave.',
+    );
+  });
+});

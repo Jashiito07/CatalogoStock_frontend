@@ -1,0 +1,115 @@
+<ion-content>
+  <main class="cs-pagina">
+    <header class="cs-encabezado-marca">
+      <a pButton routerLink="/inicio" severity="secondary" [text]="true">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        Volver al inicio
+      </a>
+      <app-logo variante="icono" />
+      <h1 class="cs-titulo">Cambiar mi clave</h1>
+      <p class="cs-ayuda">
+        Por seguridad, al cambiarla se cerrará tu sesión en los demás dispositivos.
+      </p>
+    </header>
+
+    @if (!enLinea()) {
+      <p-message severity="warn" icon="pi pi-wifi" role="status">{{ textoSinConexion }}</p-message>
+    }
+
+    <p-card>
+      <form class="cs-formulario" [formGroup]="formulario" (ngSubmit)="cambiar()" novalidate>
+        <div class="cs-campo">
+          <label for="cambiar-clave-actual">Clave actual</label>
+          <p-inputgroup>
+            <input
+              pInputPassword
+              id="cambiar-clave-actual"
+              autocomplete="current-password"
+              formControlName="claveActual"
+              [mask]="claveOculta()"
+              [invalid]="!!errorDe('claveActual')"
+              [attr.aria-describedby]="errorDe('claveActual') ? 'cambiar-clave-actual-error' : null"
+            />
+            <button
+              pButton
+              type="button"
+              severity="secondary"
+              [outlined]="true"
+              [iconOnly]="true"
+              [attr.aria-label]="claveOculta() ? 'Mostrar claves' : 'Ocultar claves'"
+              [attr.aria-pressed]="!claveOculta()"
+              (click)="claveOculta.set(!claveOculta())"
+            >
+              <i class="pi" [class.pi-eye]="claveOculta()" [class.pi-eye-slash]="!claveOculta()" aria-hidden="true"></i>
+            </button>
+          </p-inputgroup>
+          @if (errorDe('claveActual'); as mensaje) {
+            <p-message id="cambiar-clave-actual-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="cambiar-clave-nueva">Clave nueva</label>
+          <input
+            pInputPassword
+            id="cambiar-clave-nueva"
+            autocomplete="new-password"
+            formControlName="claveNueva"
+            [mask]="claveOculta()"
+            [fluid]="true"
+            [invalid]="!!errorDe('claveNueva')"
+            aria-describedby="cambiar-clave-ayuda"
+          />
+          <p id="cambiar-clave-ayuda" class="cs-ayuda">
+            De 8 a 72 caracteres, con al menos una letra y un número, distinta de la actual.
+          </p>
+          @if (errorDe('claveNueva'); as mensaje) {
+            <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+          }
+        </div>
+
+        <div class="cs-campo">
+          <label for="cambiar-clave-confirmacion">Confirma tu clave nueva</label>
+          <input
+            pInputPassword
+            id="cambiar-clave-confirmacion"
+            autocomplete="new-password"
+            formControlName="confirmacionClave"
+            [mask]="claveOculta()"
+            [fluid]="true"
+            [invalid]="!!errorDe('confirmacionClave')"
+            [attr.aria-describedby]="errorDe('confirmacionClave') ? 'cambiar-clave-confirmacion-error' : null"
+          />
+          @if (errorDe('confirmacionClave'); as mensaje) {
+            <p-message id="cambiar-clave-confirmacion-error" severity="error" size="small" variant="simple">
+              {{ mensaje }}
+            </p-message>
+          }
+        </div>
+
+        @if (errorGeneral(); as mensaje) {
+          <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+        }
+
+        <div class="cs-acciones">
+          <button
+            pButton
+            type="submit"
+            [fluid]="true"
+            [loading]="enviando()"
+            [disabled]="enviando() || !enLinea()"
+            [attr.aria-describedby]="enLinea() ? null : 'cambiar-clave-sin-conexion'"
+          >
+            <i class="pi pi-key" aria-hidden="true"></i>
+            Guardar la clave nueva
+          </button>
+          @if (!enLinea()) {
+            <p id="cambiar-clave-sin-conexion" class="cs-ayuda">{{ textoSinConexion }}</p>
+          }
+        </div>
+      </form>
+    </p-card>
+  </main>
+</ion-content>

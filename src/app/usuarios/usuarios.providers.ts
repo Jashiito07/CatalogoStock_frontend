@@ -2,9 +2,11 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { BASE_DATOS_LOCAL, CONECTIVIDAD } from '../compartido/compartido.providers';
 import { ActualizarUsuarioActual } from './aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
+import { CambiarClave } from './aplicacion/casos-uso/cambiar-clave.caso-uso';
 import { CerrarSesion } from './aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { ConsultarAvisoPrivacidad } from './aplicacion/casos-uso/consultar-aviso-privacidad.caso-uso';
 import { IniciarSesion } from './aplicacion/casos-uso/iniciar-sesion.caso-uso';
+import { RecuperarClave } from './aplicacion/casos-uso/recuperar-clave.caso-uso';
 import { RegistrarCliente } from './aplicacion/casos-uso/registrar-cliente.caso-uso';
 import { GestorSesion } from './aplicacion/gestor-sesion';
 import { AlmacenSesion } from './aplicacion/puertos/almacen-sesion.puerto';
@@ -64,6 +66,15 @@ export function proveerUsuarios(): Provider[] {
       provide: ActualizarUsuarioActual,
       useFactory: () =>
         new ActualizarUsuarioActual(inject(API_USUARIOS), inject(GestorSesion), inject(CONECTIVIDAD)),
+    },
+    {
+      provide: RecuperarClave,
+      useFactory: () => new RecuperarClave(inject(API_USUARIOS), inject(CONECTIVIDAD)),
+    },
+    {
+      provide: CambiarClave,
+      useFactory: () =>
+        new CambiarClave(inject(API_USUARIOS), inject(GestorSesion), inject(CONECTIVIDAD)),
     },
   ];
 }

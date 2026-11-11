@@ -9,6 +9,8 @@ import {
   ApiUsuarios,
   AvisoPrivacidad,
   Credenciales,
+  SolicitudCambioClave,
+  SolicitudRecuperacion,
   SolicitudRegistro,
 } from '../aplicacion/puertos/api-usuarios.puerto';
 import { esAviso } from '../dominio/aviso-privacidad';
@@ -22,6 +24,9 @@ export const RUTAS_USUARIOS = {
   salida: '/autenticacion/salida',
   yo: '/usuarios/yo',
   avisoPrivacidad: '/privacidad/aviso',
+  // recuperacion-clave.md (RF-USU-05).
+  recuperacion: '/autenticacion/recuperacion',
+  cambioClave: '/usuarios/yo/clave',
 } as const;
 
 /** Rutas públicas: nunca llevan el token de acceso ni se renuevan ante un 401. */
@@ -30,6 +35,7 @@ export const RUTAS_PUBLICAS: readonly string[] = [
   RUTAS_USUARIOS.ingresoCliente,
   RUTAS_USUARIOS.renovacion,
   RUTAS_USUARIOS.avisoPrivacidad,
+  RUTAS_USUARIOS.recuperacion,
 ];
 
 function respuestaInvalida(): ErrorApi {
@@ -85,6 +91,16 @@ export class ApiUsuariosHttp implements ApiUsuarios {
       contenido: aviso.contenido,
       vigenteDesde: aviso.vigenteDesde,
     };
+  }
+
+  async recuperarClave(solicitud: SolicitudRecuperacion): Promise<void> {
+    await this.solicitar(
+      this.http.post<unknown>(this.url(RUTAS_USUARIOS.recuperacion), solicitud),
+    );
+  }
+
+  async cambiarClave(solicitud: SolicitudCambioClave): Promise<void> {
+    await this.solicitar(this.http.post<unknown>(this.url(RUTAS_USUARIOS.cambioClave), solicitud));
   }
 
   private url(ruta: string): string {

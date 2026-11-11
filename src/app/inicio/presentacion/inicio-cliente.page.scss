@@ -6,14 +6,8 @@
   flex-wrap: wrap;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--cs-primario);
-}
-
-.logo__resalte {
-  color: var(--cs-secundario);
+.inicio__logo {
+  --cs-logo-ancho: 10rem;
 }
 
 .inicio__saludo {

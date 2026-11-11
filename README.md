@@ -62,9 +62,23 @@ Después de cambiar plugins o la configuración nativa: `npm run build` y luego
   no lo es, la app no arranca.
 - `src/environments/environment.red-local.ts`: **no se versiona** (está en `.gitignore`).
   Se crea a partir de `environment.red-local.example.ts` con la IP de tu PC, solo para el
-  APK de desarrollo.
-- Aquí solo va la URL base de la API. **Nunca** credenciales: las de PayPhone viven en el
-  backend (RN-16).
+  APK de desarrollo. En el emulador (BlueStacks o Android Studio) la PC es `10.0.2.2`:
+  `apiUrl: 'http://10.0.2.2:3000/api/v1'` y `urlPanel: 'http://10.0.2.2:4201'`.
+- `urlPanel` (D-37): URL del panel web del Vendedor que abre el botón «Ir al panel del
+  vendedor» del ingreso, en el navegador del dispositivo. Desarrollo:
+  `http://localhost:4201` (con `apiEnMismoHost`, el host se ajusta igual que el de la
+  API); producción: HTTPS (hoy una URL provisional).
+- Aquí solo van las URL de la API y del panel. **Nunca** credenciales: las de PayPhone
+  viven en el backend (RN-16).
+
+### Logo e íconos (D-38)
+
+- El paquete oficial está en `Contexto/catalogostock-logo` (espacio de trabajo). La app usa
+  copias en `public/marca/` (logo horizontal, ícono y favicon de 192 px) como imágenes
+  (`<app-logo>`), nunca como SVG en línea.
+- Los íconos de Android (`mipmap-*`: `ic_launcher`, `ic_launcher_round` y
+  `ic_launcher_foreground` del ícono adaptativo, con fondo blanco) y la pantalla de
+  arranque (`drawable*/splash.png`) se generaron a partir de ese paquete.
 
 ## Probar en el celular (red local, solo desarrollo)
 

@@ -1,6 +1,7 @@
 <ion-content>
   <main class="cs-pagina">
-    <header>
+    <header class="cs-encabezado-marca">
+      <app-logo variante="icono" />
       <h1 class="cs-titulo">Iniciar sesión</h1>
       <p class="cs-ayuda">Ingresa con el correo y la clave de tu cuenta.</p>
     </header>
@@ -61,6 +62,10 @@
               {{ mensaje }}
             </p-message>
           }
+          <!-- RF-USU-05: recuperación asistida con el código del Vendedor (D-35). -->
+          <a pButton routerLink="/recuperar-clave" [link]="true" class="ingreso__olvido">
+            ¿Olvidaste tu clave?
+          </a>
         </div>
 
         @if (errorGeneral(); as mensaje) {
@@ -79,9 +84,24 @@
       </form>
     </p-card>
 
-    <!-- D-01: el Vendedor administra desde el panel web, no desde la app. -->
+    <!-- D-01 / D-37: el Vendedor administra desde el panel web, que se abre en el navegador
+         del dispositivo (en Capacitor, las URL externas salen de la app). -->
     <p-message severity="info" icon="pi pi-briefcase">
-      ¿Eres el vendedor? Administra tu negocio desde el panel web
+      <div class="ingreso__vendedor">
+        <span>¿Eres el vendedor? Administra tu negocio desde el panel web.</span>
+        <a
+          pButton
+          id="ingreso-panel"
+          severity="secondary"
+          [outlined]="true"
+          [href]="urlPanel"
+          target="_blank"
+          rel="noopener"
+        >
+          <i class="pi pi-external-link" aria-hidden="true"></i>
+          Ir al panel del vendedor
+        </a>
+      </div>
     </p-message>
   </main>
 </ion-content>

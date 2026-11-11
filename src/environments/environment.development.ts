@@ -15,4 +15,7 @@ export const environment: ConfiguracionEntorno = {
   produccion: false,
   apiUrl: 'http://localhost:3000/api/v1',
   apiEnMismoHost: true,
+  // Panel del Vendedor (`npm start` en CatalogoStock_admin, puerto 4201; D-37). En el
+  // navegador del celular, el host se ajusta igual que el de la API.
+  urlPanel: 'http://localhost:4201',
 };

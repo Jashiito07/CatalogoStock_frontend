@@ -6,6 +6,7 @@ import { ButtonDirective } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { Message } from 'primeng/message';
 
+import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import { ConsultarEstadoBaseLocal } from '../aplicacion/casos-uso/consultar-estado-base-local.caso-uso';
 import { proveerInicio } from '../inicio.providers';
 
@@ -15,7 +16,7 @@ import { proveerInicio } from '../inicio.providers';
  */
 @Component({
   selector: 'app-bienvenida',
-  imports: [IonContent, RouterLink, Card, ButtonDirective, Badge, Message],
+  imports: [IonContent, RouterLink, LogoComponent, Card, ButtonDirective, Badge, Message],
   providers: [proveerInicio()],
   templateUrl: './bienvenida.page.html',
   styleUrl: './bienvenida.page.scss',

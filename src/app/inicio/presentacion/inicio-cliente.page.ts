@@ -7,7 +7,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonDirective } from 'primeng/button';
@@ -17,19 +17,21 @@ import { Message } from 'primeng/message';
 import { Tag } from 'primeng/tag';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
+import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
 import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { GestorSesion } from '../../usuarios/aplicacion/gestor-sesion';
 import { primerNombre, Usuario } from '../../usuarios/dominio/sesion';
 
 /**
- * Inicio del Cliente (PLAN 1.6): saludo, nombre y cerrar sesión. Será la entrada al
+ * Inicio del Cliente (PLAN 1.6): saludo, nombre, «Cambiar mi clave» (RF-USU-05) y cerrar
+ * sesión. Será la entrada al
  * catálogo en F2 y F4. Funciona sin conexión con la sesión guardada (D-10) y, al
  * recuperar la conexión, refresca los datos y renueva la sesión si hace falta.
  */
 @Component({
   selector: 'app-inicio-cliente',
-  imports: [IonContent, Card, ButtonDirective, ConfirmDialog, Message, Tag],
+  imports: [IonContent, RouterLink, LogoComponent, Card, ButtonDirective, ConfirmDialog, Message, Tag],
   providers: [ConfirmationService],
   templateUrl: './inicio-cliente.page.html',
   styleUrl: './inicio-cliente.page.scss',

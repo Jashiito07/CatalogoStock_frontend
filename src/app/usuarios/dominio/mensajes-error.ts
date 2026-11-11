@@ -2,7 +2,7 @@ import { CODIGOS_ERROR, ErrorApi, ErrorSinConexion } from '../../compartido/domi
 import { ErrorSesionExpirada } from './errores';
 
 /** Dónde ocurrió el error: cambia el mensaje de «sin conexión». */
-export type ContextoError = 'ingreso' | 'registro' | 'aviso' | 'general';
+export type ContextoError = 'ingreso' | 'registro' | 'aviso' | 'clave' | 'general';
 
 export const MENSAJES_ERROR = {
   credencialesInvalidas: 'Correo o clave incorrectos.',
@@ -19,6 +19,11 @@ export const MENSAJES_ERROR = {
   registroSinConexion: 'Necesitas conexión para crear tu cuenta.',
   avisoSinConexion:
     'No se pudo cargar el aviso de privacidad. Revisa tu conexión e inténtalo de nuevo.',
+  /** Recuperación y cambio de clave sin conexión (recuperacion-clave.md, «App móvil»). */
+  claveSinConexion: 'Necesitas conexión para cambiar tu clave.',
+  /** Mensaje único de 422 `CODIGO_INVALIDO`: no revela el motivo (RF-USU-05). */
+  codigoInvalido: 'El código no es válido o ya venció. Pide uno nuevo a tu vendedor.',
+  claveActualIncorrecta: 'La clave actual no es correcta.',
   sinConexion: 'No hay conexión con el servidor. Inténtalo de nuevo.',
   inesperado: 'No se pudo completar la operación. Inténtalo de nuevo.',
 } as const;
@@ -36,6 +41,8 @@ export function mensajeDeError(error: unknown, contexto: ContextoError = 'genera
         return MENSAJES_ERROR.registroSinConexion;
       case 'aviso':
         return MENSAJES_ERROR.avisoSinConexion;
+      case 'clave':
+        return MENSAJES_ERROR.claveSinConexion;
       default:
         return MENSAJES_ERROR.sinConexion;
     }
@@ -69,6 +76,10 @@ export function mensajeDeError(error: unknown, contexto: ContextoError = 'genera
       return MENSAJES_ERROR.noAutorizado;
     case CODIGOS_ERROR.noEncontrado:
       return MENSAJES_ERROR.noEncontrado;
+    case CODIGOS_ERROR.codigoInvalido:
+      return MENSAJES_ERROR.codigoInvalido;
+    case CODIGOS_ERROR.claveActualIncorrecta:
+      return MENSAJES_ERROR.claveActualIncorrecta;
     default:
       return MENSAJES_ERROR.inesperado;
   }
