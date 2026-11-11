@@ -4,6 +4,8 @@ import localeEsEc from '@angular/common/locales/es-EC';
 import {
   ApplicationConfig,
   LOCALE_ID,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
@@ -14,6 +16,7 @@ import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
 import { proveerCompartido } from './compartido/compartido.providers';
+import { CLASE_TEMA_OSCURO, ServicioTema } from './compartido/presentacion/tema/servicio-tema';
 import { TemaCatalogoStock } from './compartido/presentacion/tema/tema-catalogostock';
 import { interceptorAutenticacion } from './usuarios/infraestructura/interceptor-autenticacion';
 import { proveerUsuarios } from './usuarios/usuarios.providers';
@@ -33,12 +36,14 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: {
         preset: TemaCatalogoStock,
-        // Solo tema claro: el contraste de RNF-11 se validó sobre el Fondo corporativo.
-        options: { darkModeSelector: false },
+        // Modo oscuro (N2): lo activa la clase `app-oscuro` en <html> (ServicioTema).
+        options: { darkModeSelector: `.${CLASE_TEMA_OSCURO}` },
       },
       ripple: true,
     }),
     MessageService,
+    // N2: el tema se aplica antes de la primera pantalla (sin destello del tema equivocado).
+    provideAppInitializer(() => inject(ServicioTema).iniciar()),
     { provide: LOCALE_ID, useValue: 'es-EC' },
     proveerCompartido(),
     proveerUsuarios(),

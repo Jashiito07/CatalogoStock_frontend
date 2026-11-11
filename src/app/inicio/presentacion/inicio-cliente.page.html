@@ -39,6 +39,25 @@
       </ng-template>
     </p-card>
 
+    <p-card header="Apariencia">
+      <div class="cs-campo">
+        <span id="etiqueta-tema" class="inicio__etiqueta">Tema</span>
+        <p-selectbutton
+          [options]="opcionesTema"
+          optionLabel="etiqueta"
+          optionValue="valor"
+          [allowEmpty]="false"
+          ariaLabelledBy="etiqueta-tema"
+          [ngModel]="preferenciaTema()"
+          (ngModelChange)="elegirTema($event)"
+        />
+        <p class="cs-ayuda">
+          Automático: oscuro de 18:40 a 06:45 y claro el resto del día, según la hora de tu
+          teléfono.
+        </p>
+      </div>
+    </p-card>
+
     <p-card header="Catálogo" subheader="Muy pronto">
       <p class="inicio__texto">
         Aquí podrás explorar los productos de Yanbal, Avon, L'Bel y otras marcas, incluso sin

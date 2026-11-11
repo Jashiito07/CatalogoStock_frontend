@@ -7,6 +7,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -14,9 +15,12 @@ import { ButtonDirective } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Message } from 'primeng/message';
+import { SelectButton } from 'primeng/selectbutton';
 import { Tag } from 'primeng/tag';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
+import { PreferenciaTema } from '../../compartido/dominio/tema';
+import { ServicioTema } from '../../compartido/presentacion/tema/servicio-tema';
 import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
 import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
@@ -31,7 +35,18 @@ import { primerNombre, Usuario } from '../../usuarios/dominio/sesion';
  */
 @Component({
   selector: 'app-inicio-cliente',
-  imports: [IonContent, RouterLink, LogoComponent, Card, ButtonDirective, ConfirmDialog, Message, Tag],
+  imports: [
+    IonContent,
+    RouterLink,
+    FormsModule,
+    LogoComponent,
+    Card,
+    ButtonDirective,
+    ConfirmDialog,
+    Message,
+    SelectButton,
+    Tag,
+  ],
   providers: [ConfirmationService],
   templateUrl: './inicio-cliente.page.html',
   styleUrl: './inicio-cliente.page.scss',
@@ -46,6 +61,16 @@ export class InicioClientePage implements OnInit {
   private readonly mensajes = inject(MessageService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly tema = inject(ServicioTema);
+
+  /** Tema: Automático (18:40 a 06:45 oscuro) / Claro / Oscuro (N2). */
+  protected readonly opcionesTema: { etiqueta: string; valor: PreferenciaTema }[] = [
+    { etiqueta: 'Automático', valor: 'automatico' },
+    { etiqueta: 'Claro', valor: 'claro' },
+    { etiqueta: 'Oscuro', valor: 'oscuro' },
+  ];
+  protected readonly preferenciaTema = this.tema.preferencia;
 
   protected readonly usuario = signal<Usuario | null>(this.gestor.actual()?.usuario ?? null);
   protected readonly enLinea = signal(true);
@@ -82,6 +107,11 @@ export class InicioClientePage implements OnInit {
       // Error temporal o sesión terminada (ya gestionada por el interceptor): se
       // conservan los datos guardados.
     }
+  }
+
+  protected elegirTema(preferencia: PreferenciaTema | null): void {
+    // El selector no permite dejar el valor vacío (allowEmpty = false), pero se protege.
+    if (preferencia) void this.tema.seleccionar(preferencia);
   }
 
   protected confirmarCierre(): void {

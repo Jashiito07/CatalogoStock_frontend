@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { Confirmation, ConfirmationService, MessageService } from 'primeng/api';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
+import { CLASE_TEMA_OSCURO, ServicioTema } from '../../compartido/presentacion/tema/servicio-tema';
 import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
 import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { GestorSesion } from '../../usuarios/aplicacion/gestor-sesion';
@@ -63,6 +64,25 @@ describe('InicioClientePage (PLAN 1.6, D-10)', () => {
     const logo = elemento.querySelector<HTMLImageElement>('app-logo img');
     expect(logo?.getAttribute('src')).toBe('marca/catalogostock-logo-horizontal.svg');
     expect(logo?.alt).toBe('CatálogoStock');
+  });
+
+  it('N2: ofrece el selector Tema (Automático / Claro / Oscuro) y aplica la opción elegida', async () => {
+    const { fixture, elemento } = await abrir();
+    const tema = TestBed.inject(ServicioTema);
+
+    const opciones = Array.from(elemento.querySelectorAll<HTMLElement>('p-selectbutton p-togglebutton'));
+    expect(opciones.map((o) => o.textContent?.trim())).toEqual(['Automático', 'Claro', 'Oscuro']);
+    expect(tema.preferencia()).toBe('automatico');
+
+    const oscuro = opciones.find((o) => o.textContent?.trim() === 'Oscuro');
+    oscuro?.click();
+    fixture.detectChanges();
+    await esperar();
+
+    expect(tema.preferencia()).toBe('oscuro');
+    expect(document.documentElement.classList.contains(CLASE_TEMA_OSCURO)).toBe(true);
+    TestBed.inject(ServicioTema).ngOnDestroy();
+    document.documentElement.classList.remove(CLASE_TEMA_OSCURO);
   });
 
   it('D-10 / RN-07: sin conexión avisa que los datos guardados no son definitivos', async () => {
