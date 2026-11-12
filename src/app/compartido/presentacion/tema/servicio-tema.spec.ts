@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
+import { BarraEstado } from '../../aplicacion/puertos/barra-estado.puerto';
 import { AlmacenPreferenciaTema } from '../../aplicacion/puertos/preferencia-tema.puerto';
 import { PreferenciaTema } from '../../dominio/tema';
 import {
   AHORA,
   ALMACEN_PREFERENCIA_TEMA,
+  BARRA_ESTADO,
   CLASE_TEMA_OSCURO,
   ESPERA_PREFERENCIA_MS,
   INTERVALO_REVISION_TEMA_MS,
@@ -130,6 +132,37 @@ describe('ServicioTema (N2)', () => {
     await servicio.seleccionar('automatico');
     expect(esOscuro()).toBe(false); // 12:00
     expect(almacen.guardada).toBe('automatico');
+  });
+
+  it('D-41: avisa a la barra de estado con el tema y el color al cambiar', async () => {
+    const llamadas: [string, string][] = [];
+    let falla = false;
+    const barra: BarraEstado = {
+      aplicar: (tema, color) => {
+        llamadas.push([tema, color]);
+        return falla ? Promise.reject(new Error('x')) : Promise.resolve();
+      },
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AHORA, useValue: () => hora },
+        { provide: ALMACEN_PREFERENCIA_TEMA, useValue: new AlmacenEnMemoria() },
+        { provide: BARRA_ESTADO, useValue: barra },
+      ],
+    });
+    const servicio = TestBed.inject(ServicioTema);
+    document.documentElement.style.setProperty('--cs-fondo', '#f8fafc');
+    await servicio.iniciar();
+    document.documentElement.style.setProperty('--cs-fondo', '#0f172a');
+    await servicio.seleccionar('oscuro');
+    falla = true;
+    await servicio.seleccionar('claro'); // un fallo del puerto no rompe el servicio
+    document.documentElement.style.removeProperty('--cs-fondo');
+
+    expect(llamadas[0]).toEqual(['claro', '#f8fafc']);
+    expect(llamadas[1]).toEqual(['oscuro', '#0f172a']);
+    expect(llamadas[2][0]).toBe('claro');
+    expect(servicio.temaAplicado()).toBe('claro');
   });
 
   it('al destruirse limpia el temporizador y deja de oír visibilitychange', async () => {

@@ -4,10 +4,11 @@ import { environment } from '../../environments/environment';
 import { BaseDatosLocal } from './aplicacion/puertos/base-datos-local.puerto';
 import { Conectividad } from './aplicacion/puertos/conectividad.puerto';
 import { BaseDatosSqlite } from './infraestructura/base-datos';
+import { BarraEstadoCapacitor } from './infraestructura/barra-estado-capacitor';
 import { ConectividadCapacitor } from './infraestructura/conectividad-capacitor';
 import { PreferenciaTemaSqlite } from './infraestructura/preferencia-tema.sqlite';
 import { resolverUrlApi, resolverUrlPanel } from './infraestructura/url-api';
-import { ALMACEN_PREFERENCIA_TEMA } from './presentacion/tema/servicio-tema';
+import { ALMACEN_PREFERENCIA_TEMA, BARRA_ESTADO } from './presentacion/tema/servicio-tema';
 
 /** Puerto de la base de datos local; los casos de uso lo reciben por inyección. */
 export const BASE_DATOS_LOCAL = new InjectionToken<BaseDatosLocal>('BASE_DATOS_LOCAL');
@@ -32,6 +33,7 @@ export function proveerCompartido(): Provider[] {
   return [
     { provide: BASE_DATOS_LOCAL, useExisting: BaseDatosSqlite },
     { provide: CONECTIVIDAD, useExisting: ConectividadCapacitor },
+    { provide: BARRA_ESTADO, useFactory: () => new BarraEstadoCapacitor() },
     {
       provide: ALMACEN_PREFERENCIA_TEMA,
       useFactory: () => new PreferenciaTemaSqlite(inject(BASE_DATOS_LOCAL)),
