@@ -1,10 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+
+import { ServicioTema } from '../tema/servicio-tema';
 
 /** Archivos del logo oficial copiados de `Contexto/catalogostock-logo` a `public/marca/`. */
 export const ARCHIVOS_LOGO = {
   horizontal: 'marca/catalogostock-logo-horizontal.svg',
   icono: 'marca/catalogostock-icono.svg',
 } as const;
+
+/** Variante del logo horizontal para fondo oscuro (N2). */
+export const LOGO_HORIZONTAL_FONDO_OSCURO = 'marca/catalogostock-logo-horizontal-fondo-oscuro.svg';
 
 export type VarianteLogo = keyof typeof ARCHIVOS_LOGO;
 
@@ -48,5 +53,11 @@ export type VarianteLogo = keyof typeof ARCHIVOS_LOGO;
 export class LogoComponent {
   readonly variante = input<VarianteLogo>('horizontal');
 
-  protected readonly ruta = computed(() => ARCHIVOS_LOGO[this.variante()]);
+  private readonly tema = inject(ServicioTema);
+
+  protected readonly ruta = computed(() =>
+    this.variante() === 'horizontal' && this.tema.temaAplicado() === 'oscuro'
+      ? LOGO_HORIZONTAL_FONDO_OSCURO
+      : ARCHIVOS_LOGO[this.variante()],
+  );
 }

@@ -210,6 +210,35 @@ versión que use la misma `sql.js`.** Comprueba la versión con `npm ls sql.js`.
 Si SQLite no arranca, `BaseDatosSqlite.iniciar()` se rechaza tras 10 s
 (`TIEMPO_LIMITE_INICIO_MS`) en vez de quedar esperando, y se puede reintentar.
 
+## Tema automático claro / oscuro (N2)
+
+- **Horario** (hora local del dispositivo, no la del servidor): de **18:40 a 06:45** la app
+  usa el **modo oscuro con violeta**; de 06:45 a 18:40, el modo claro. El intervalo es
+  `[18:40, 06:45)`: 18:39 claro, 18:40 oscuro, 06:44 oscuro, 06:45 claro. La regla vive en
+  `compartido/dominio/tema.ts` (`temaPorHora`, `resolverTema`), recibe la hora como dato y
+  se prueba sin depender de la zona horaria del equipo.
+- **Cambia solo** con la app abierta: `ServicioTema` revisa la hora cada 30 s y al volver a
+  primer plano (`visibilitychange`). No usa dependencias nuevas.
+- **Selector «Tema»** (`p-selectbutton`: Automático / Claro / Oscuro) en la pantalla de
+  Inicio, tarjeta «Apariencia». Automático es el valor por defecto. La preferencia se guarda
+  en la tabla local `metadatos` (clave `preferencia_tema`) detrás del puerto
+  `AlmacenPreferenciaTema`, sin cambiar el esquema.
+- **Sin destello**: el tema se aplica en el arranque de Angular (`provideAppInitializer`),
+  antes de la primera pantalla. Si SQLite tarda más de 400 ms se usa el cálculo automático y
+  se corrige al llegar la preferencia guardada.
+- **Cómo se aplica**: la clase `app-oscuro` en `<html>` es el `darkModeSelector` de PrimeNG
+  y activa las variables `--cs-*` oscuras (`colores.css`), `color-scheme: dark` y el logo
+  `catalogostock-logo-horizontal-fondo-oscuro.svg` (`<app-logo>`). El preset
+  (`tema-catalogostock.ts`) define ambos modos con `light-dark()`. También actualiza
+  `<meta name="theme-color">`.
+- **Forzar el tema en desarrollo** (solo con `ng serve`/`isDevMode()`, nunca en producción):
+  abre `http://localhost:4200/inicio?tema=oscuro` (o `claro`, `automatico`). No se guarda.
+  Para forzarlo como usuario: Inicio → Apariencia → Tema.
+- **Paleta oscura**: fondo `#0F172A`, superficies `#1E293B`, bordes `#334155`, texto
+  `#E2E8F0` / `#CBD5E1`; acción principal = Secundario `#7C3AED` (texto blanco); precios y
+  enlaces en `#C4B5FD`; el Acento `#F97316` conserva siempre texto `#1E293B`. Los contrastes
+  (RNF-11 ≥ 4.5:1) se comprueban en `presentacion/tema/contraste.spec.ts`.
+
 ## Estructura
 
 ```text
