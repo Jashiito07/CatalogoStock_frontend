@@ -231,6 +231,7 @@ Si SQLite no arranca, `BaseDatosSqlite.iniciar()` se rechaza tras 10 s
   `catalogostock-logo-horizontal-fondo-oscuro.svg` (`<app-logo>`). El preset
   (`tema-catalogostock.ts`) define ambos modos con `light-dark()`. También actualiza
   `<meta name="theme-color">`.
+- **Barra de estado de Android**: sigue el tema efectivo con `@capacitor/status-bar` (puerto `BarraEstado`, adaptador `BarraEstadoCapacitor`): fondo `--cs-fondo` con íconos claros en oscuro y íconos oscuros en claro, sin cubrir el contenido; en el navegador no hace nada.
 - **Forzar el tema en desarrollo** (solo con `ng serve`/`isDevMode()`, nunca en producción):
   abre `http://localhost:4200/inicio?tema=oscuro` (o `claro`, `automatico`). No se guarda.
   Para forzarlo como usuario: Inicio → Apariencia → Tema.

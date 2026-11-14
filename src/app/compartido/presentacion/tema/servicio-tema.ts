@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, InjectionToken, isDevMode, OnDestroy, signal } from '@angular/core';
 
+import { BarraEstado } from '../../aplicacion/puertos/barra-estado.puerto';
 import { AlmacenPreferenciaTema } from '../../aplicacion/puertos/preferencia-tema.puerto';
 import {
   esPreferenciaTema,
@@ -15,6 +16,9 @@ import {
 export const ALMACEN_PREFERENCIA_TEMA = new InjectionToken<AlmacenPreferenciaTema>(
   'ALMACEN_PREFERENCIA_TEMA',
 );
+
+/** Puerto de la barra de estado nativa (adaptador: `@capacitor/status-bar`). */
+export const BARRA_ESTADO = new InjectionToken<BarraEstado>('BARRA_ESTADO');
 
 /** Reloj del dispositivo; las pruebas lo sustituyen. */
 export const AHORA = new InjectionToken<() => Date>('AHORA', {
@@ -41,6 +45,8 @@ export class ServicioTema implements OnDestroy {
   private readonly documento = inject(DOCUMENT);
   private readonly ahora = inject(AHORA);
   private readonly almacen = inject(ALMACEN_PREFERENCIA_TEMA, { optional: true });
+
+  private readonly barraEstado = inject(BARRA_ESTADO, { optional: true });
 
   readonly preferencia = signal<PreferenciaTema>(PREFERENCIA_TEMA_POR_DEFECTO);
   readonly temaAplicado = signal<TemaAplicado>('claro');
@@ -135,6 +141,7 @@ export class ServicioTema implements OnDestroy {
   private actualizarColorBarra(raiz: HTMLElement): void {
     const vista = this.documento.defaultView;
     const fondo = vista?.getComputedStyle(raiz).getPropertyValue('--cs-fondo').trim();
+    void this.barraEstado?.aplicar(this.temaAplicado(), fondo ?? '').catch(() => undefined);
     if (!fondo) return;
     let meta = this.documento.head.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (!meta) {
