@@ -2,7 +2,14 @@ import { CODIGOS_ERROR, ErrorApi, ErrorSinConexion } from '../../compartido/domi
 import { ErrorSesionExpirada } from './errores';
 
 /** Dónde ocurrió el error: cambia el mensaje de «sin conexión». */
-export type ContextoError = 'ingreso' | 'registro' | 'aviso' | 'clave' | 'general';
+export type ContextoError =
+  | 'ingreso'
+  | 'registro'
+  | 'aviso'
+  | 'clave'
+  | 'verificacion'
+  | 'recuperacionCorreo'
+  | 'general';
 
 export const MENSAJES_ERROR = {
   credencialesInvalidas: 'Correo o clave incorrectos.',
@@ -24,6 +31,13 @@ export const MENSAJES_ERROR = {
   /** Mensaje único de 422 `CODIGO_INVALIDO`: no revela el motivo (RF-USU-05). */
   codigoInvalido: 'El código no es válido o ya venció. Pide uno nuevo a tu vendedor.',
   claveActualIncorrecta: 'La clave actual no es correcta.',
+  /** Verificación del correo y recuperación por correo (correo.md, RF-USU-05, D-50). */
+  verificacionSinConexion: 'Necesitas conexión para verificar tu correo.',
+  codigoCorreoInvalido: 'El código no es válido o ya venció. Pide uno nuevo.',
+  correoNoDisponible: 'No pudimos enviar el correo, intenta de nuevo.',
+  correoYaVerificado: 'Tu correo ya está verificado.',
+  /** Respuesta idéntica exista o no la cuenta, para no revelar qué correos están registrados. */
+  recuperacionSolicitada: 'Si el correo está registrado y verificado, te enviamos un código.',
   sinConexion: 'No hay conexión con el servidor. Inténtalo de nuevo.',
   inesperado: 'No se pudo completar la operación. Inténtalo de nuevo.',
 } as const;
@@ -42,13 +56,20 @@ export function mensajeDeError(error: unknown, contexto: ContextoError = 'genera
       case 'aviso':
         return MENSAJES_ERROR.avisoSinConexion;
       case 'clave':
+      case 'recuperacionCorreo':
         return MENSAJES_ERROR.claveSinConexion;
+      case 'verificacion':
+        return MENSAJES_ERROR.verificacionSinConexion;
       default:
         return MENSAJES_ERROR.sinConexion;
     }
   }
   if (error instanceof ErrorSesionExpirada) return MENSAJES_ERROR.sesionExpirada;
   if (!(error instanceof ErrorApi)) return MENSAJES_ERROR.inesperado;
+  // 503: el servicio de correo falló; no se pierde nada y se puede reintentar.
+  if (error.codigo === CODIGOS_ERROR.correoNoDisponible || error.estado === 503) {
+    return MENSAJES_ERROR.correoNoDisponible;
+  }
 
   switch (error.codigo) {
     // D-19: mismo mensaje para clave incorrecta, correo inexistente o rol no permitido.
@@ -77,10 +98,30 @@ export function mensajeDeError(error: unknown, contexto: ContextoError = 'genera
     case CODIGOS_ERROR.noEncontrado:
       return MENSAJES_ERROR.noEncontrado;
     case CODIGOS_ERROR.codigoInvalido:
-      return MENSAJES_ERROR.codigoInvalido;
+      // El mensaje de la recuperación asistida menciona al vendedor; el de correo, no.
+      return contexto === 'verificacion' || contexto === 'recuperacionCorreo'
+        ? MENSAJES_ERROR.codigoCorreoInvalido
+        : MENSAJES_ERROR.codigoInvalido;
+    case CODIGOS_ERROR.correoYaVerificado:
+      return MENSAJES_ERROR.correoYaVerificado;
     case CODIGOS_ERROR.claveActualIncorrecta:
       return MENSAJES_ERROR.claveActualIncorrecta;
     default:
       return MENSAJES_ERROR.inesperado;
   }
+}
+
+/** Intentos fallidos admitidos por código (correo.md, regla 3). */
+export const INTENTOS_MAXIMOS_CODIGO = 5;
+
+/**
+ * Mensaje de un 422 `CODIGO_INVALIDO` con los intentos que se llevan con este código. El
+ * servidor no informa el contador (para no revelar el motivo), así que la app cuenta
+ * localmente los fallos desde que se envió el código.
+ */
+export function mensajeCodigoIncorrecto(intentosFallidos: number): string {
+  if (intentosFallidos >= INTENTOS_MAXIMOS_CODIGO) {
+    return `${MENSAJES_ERROR.codigoCorreoInvalido} Agotaste los ${INTENTOS_MAXIMOS_CODIGO} intentos de este código.`;
+  }
+  return `${MENSAJES_ERROR.codigoCorreoInvalido} Intento ${intentosFallidos} de ${INTENTOS_MAXIMOS_CODIGO}.`;
 }

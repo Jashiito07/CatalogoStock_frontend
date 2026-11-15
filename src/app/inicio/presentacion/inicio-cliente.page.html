@@ -39,6 +39,11 @@
       </ng-template>
     </p-card>
 
+    @if (sinVerificar()) {
+      <!-- RF-USU-05 / D-50: aviso mientras el correo no esté verificado. -->
+      <app-verificar-correo [correo]="usuario()?.correo ?? ''" [enLinea]="enLinea()" />
+    }
+
     <p-card header="Apariencia">
       <div class="cs-campo">
         <span id="etiqueta-tema" class="inicio__etiqueta">Tema</span>

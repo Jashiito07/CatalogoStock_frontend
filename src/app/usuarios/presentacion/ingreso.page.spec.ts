@@ -86,6 +86,18 @@ describe('IngresoPage (RF-USU-01, CA-01, D-01, D-19)', () => {
     );
   });
 
+  it('RF-USU-05: si la página se reutiliza (ion-router-outlet), el aviso aparece al cambiar el motivo', async () => {
+    const elemento = await abrir('/ingreso');
+    expect(elemento.querySelector('[role="status"]')).toBeNull();
+
+    await harness.navigateByUrl('/ingreso?motivo=clave-restablecida');
+    harness.detectChanges();
+
+    expect(elemento.querySelector('[role="status"]')?.textContent).toContain(
+      'Tu clave se cambió. Inicia sesión con tu nueva clave.',
+    );
+  });
+
   it('D-38: muestra el ícono oficial como imagen', async () => {
     const elemento = await abrir();
     const logo = elemento.querySelector<HTMLImageElement>('app-logo img');

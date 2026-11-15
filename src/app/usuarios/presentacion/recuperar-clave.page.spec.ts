@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { MessageService } from 'primeng/api';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
 import { ErrorApi, ErrorSinConexion } from '../../compartido/dominio/error-api';
 import { RecuperarClave } from '../aplicacion/casos-uso/recuperar-clave.caso-uso';
+import { SolicitarCodigoRecuperacion } from '../aplicacion/casos-uso/solicitar-codigo-recuperacion.caso-uso';
 import { ConectividadFalsa } from '../pruebas/dobles';
 import { RecuperarClavePage } from './recuperar-clave.page';
 
@@ -15,13 +17,23 @@ describe('RecuperarClavePage (RF-USU-05, D-35, D-39)', () => {
   let conectividad: ConectividadFalsa;
   let harness: RouterTestingHarness;
 
-  async function abrir(): Promise<HTMLElement> {
+  async function abrir(modo: 'correo' | 'vendedor' = 'vendedor'): Promise<HTMLElement> {
     harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/recuperar-clave', RecuperarClavePage);
     harness.detectChanges();
     await esperar();
     harness.detectChanges();
-    return harness.routeNativeElement as HTMLElement;
+    const elemento = harness.routeNativeElement as HTMLElement;
+    if (modo === 'vendedor') {
+      const opcion = Array.from(
+        elemento.querySelectorAll<HTMLElement>('p-selectbutton p-togglebutton'),
+      ).find((o) => o.textContent?.trim() === 'Con mi vendedor');
+      opcion?.click();
+      harness.detectChanges();
+      await esperar();
+      harness.detectChanges();
+    }
+    return elemento;
   }
 
   function escribir(elemento: HTMLElement, selector: string, valor: string): void {
@@ -59,10 +71,23 @@ describe('RecuperarClavePage (RF-USU-05, D-35, D-39)', () => {
           { path: 'recuperar-clave', component: RecuperarClavePage },
           { path: 'ingreso', children: [] },
         ]),
+        MessageService,
         { provide: RecuperarClave, useValue: { ejecutar } },
+        { provide: SolicitarCodigoRecuperacion, useValue: { ejecutar: vi.fn() } },
         { provide: CONECTIVIDAD, useValue: conectividad },
       ],
     });
+  });
+
+  it('D-50: por defecto ofrece recibir el código por correo y conserva la opción del vendedor', async () => {
+    const elemento = await abrir('correo');
+
+    expect(elemento.querySelector('app-recuperar-por-correo')).not.toBeNull();
+    expect(elemento.querySelector('#recuperar-codigo')).toBeNull();
+    const opciones = Array.from(elemento.querySelectorAll('p-selectbutton p-togglebutton')).map((o) =>
+      o.textContent?.trim(),
+    );
+    expect(opciones).toEqual(['Por correo', 'Con mi vendedor']);
   });
 
   it('explica que el código lo da el vendedor y pide el código con teclado numérico', async () => {

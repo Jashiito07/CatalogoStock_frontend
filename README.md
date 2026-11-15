@@ -210,6 +210,25 @@ versión que use la misma `sql.js`.** Comprueba la versión con `npm ls sql.js`.
 Si SQLite no arranca, `BaseDatosSqlite.iniciar()` se rechaza tras 10 s
 (`TIEMPO_LIMITE_INICIO_MS`) en vez de quedar esperando, y se puede reintentar.
 
+## Verificación del correo y recuperación de clave por correo (RF-USU-05, D-50)
+
+Contrato: `docs/contrato-api/correo.md`. Requiere conexión (el resto de la app sigue
+funcionando sin ella).
+
+- **Inicio**: mientras `correoVerificadoEn` sea `null`, aparece el aviso «Verifica tu correo»
+  con «Enviar código» (`POST /usuarios/yo/correo/verificacion`), un campo de 6 dígitos y
+  «Confirmar» (`POST /usuarios/yo/correo/confirmacion`). El reenvío espera 60 s; un 429
+  usa la espera que indica el servidor y un 503 pide reintentar. El código solo se envía
+  al correo registrado de la cuenta.
+- **Recuperar clave** (desde «¿Olvidaste tu clave?»): por defecto «Por correo» (correo →
+  mensaje neutro «Si el correo está registrado y verificado, te enviamos un código» →
+  código + clave nueva), o «Con mi vendedor» (código que genera el Vendedor en el panel,
+  D-35). Al terminar se borra la sesión local y se vuelve al ingreso.
+- El botón «Ir al panel del vendedor» del ingreso se conserva (D-37) para quien no verificó
+  su correo.
+- Para probar sin enviar correos reales, intercepta la red del navegador (CDP/DevTools) o
+  usa un servidor simulado: la API real limita a 3 envíos por hora y por cuenta.
+
 ## Tema automático claro / oscuro (N2)
 
 - **Horario** (hora local del dispositivo, no la del servidor): de **18:40 a 06:45** la app

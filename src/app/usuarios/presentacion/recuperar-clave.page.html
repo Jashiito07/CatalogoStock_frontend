@@ -3,16 +3,35 @@
     <header class="cs-encabezado-marca">
       <app-logo variante="icono" />
       <h1 class="cs-titulo">Recuperar clave</h1>
-      <p class="cs-ayuda">
-        Pide a tu vendedor un código de recuperación. Vence a los 15 minutos y sirve una sola
-        vez.
-      </p>
+      @if (modo() === 'vendedor') {
+        <p class="cs-ayuda">
+          Pide a tu vendedor un código de recuperación. Vence a los 15 minutos y sirve una sola
+          vez.
+        </p>
+      } @else {
+        <p class="cs-ayuda">
+          Te enviaremos un código a tu correo. Vence a los 15 minutos y sirve una sola vez.
+        </p>
+      }
     </header>
+
+    <p-selectbutton
+      [options]="opcionesModo"
+      optionLabel="etiqueta"
+      optionValue="valor"
+      [allowEmpty]="false"
+      ariaLabel="Cómo recibir el código"
+      [ngModel]="modo()"
+      (ngModelChange)="elegirModo($event)"
+    />
 
     @if (!enLinea()) {
       <p-message severity="warn" icon="pi pi-wifi" role="status">{{ textoSinConexion }}</p-message>
     }
 
+    @if (modo() === 'correo') {
+      <app-recuperar-por-correo [enLinea]="enLinea()" />
+    } @else {
     <p-card>
       <form class="cs-formulario" [formGroup]="formulario" (ngSubmit)="recuperar()" novalidate>
         <div class="cs-campo">
@@ -126,11 +145,13 @@
           @if (!enLinea()) {
             <p id="recuperar-sin-conexion" class="cs-ayuda">{{ textoSinConexion }}</p>
           }
-          <a pButton routerLink="/ingreso" severity="secondary" [text]="true" [fluid]="true">
-            Volver a iniciar sesión
-          </a>
         </div>
       </form>
     </p-card>
+    }
+
+    <a pButton routerLink="/ingreso" severity="secondary" [text]="true" [fluid]="true">
+      Volver a iniciar sesión
+    </a>
   </main>
 </ion-content>

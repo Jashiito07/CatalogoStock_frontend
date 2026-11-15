@@ -5,7 +5,10 @@ import { ActualizarUsuarioActual } from './aplicacion/casos-uso/actualizar-usuar
 import { CambiarClave } from './aplicacion/casos-uso/cambiar-clave.caso-uso';
 import { CerrarSesion } from './aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { ConsultarAvisoPrivacidad } from './aplicacion/casos-uso/consultar-aviso-privacidad.caso-uso';
+import { ConfirmarVerificacionCorreo } from './aplicacion/casos-uso/confirmar-verificacion-correo.caso-uso';
 import { IniciarSesion } from './aplicacion/casos-uso/iniciar-sesion.caso-uso';
+import { SolicitarCodigoRecuperacion } from './aplicacion/casos-uso/solicitar-codigo-recuperacion.caso-uso';
+import { SolicitarVerificacionCorreo } from './aplicacion/casos-uso/solicitar-verificacion-correo.caso-uso';
 import { RecuperarClave } from './aplicacion/casos-uso/recuperar-clave.caso-uso';
 import { RegistrarCliente } from './aplicacion/casos-uso/registrar-cliente.caso-uso';
 import { GestorSesion } from './aplicacion/gestor-sesion';
@@ -69,7 +72,33 @@ export function proveerUsuarios(): Provider[] {
     },
     {
       provide: RecuperarClave,
-      useFactory: () => new RecuperarClave(inject(API_USUARIOS), inject(CONECTIVIDAD)),
+      useFactory: () =>
+        new RecuperarClave(inject(API_USUARIOS), inject(CONECTIVIDAD), inject(GestorSesion)),
+    },
+    {
+      provide: SolicitarCodigoRecuperacion,
+      useFactory: () =>
+        new SolicitarCodigoRecuperacion(inject(API_USUARIOS), inject(CONECTIVIDAD)),
+    },
+    {
+      provide: SolicitarVerificacionCorreo,
+      useFactory: () =>
+        new SolicitarVerificacionCorreo(
+          inject(API_USUARIOS),
+          inject(GestorSesion),
+          inject(CONECTIVIDAD),
+          inject(ActualizarUsuarioActual),
+        ),
+    },
+    {
+      provide: ConfirmarVerificacionCorreo,
+      useFactory: () =>
+        new ConfirmarVerificacionCorreo(
+          inject(API_USUARIOS),
+          inject(GestorSesion),
+          inject(CONECTIVIDAD),
+          inject(ActualizarUsuarioActual),
+        ),
     },
     {
       provide: CambiarClave,

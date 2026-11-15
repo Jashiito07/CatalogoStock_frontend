@@ -1,0 +1,29 @@
+.verificar-correo__titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--cs-primario);
+}
+
+.verificar-correo__texto {
+  margin: 0 0 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.verificar-correo__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.verificar-correo__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}

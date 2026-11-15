@@ -15,6 +15,11 @@ export interface Usuario {
   readonly privacidadAceptadaEn: string | null;
   readonly versionPrivacidad: string | null;
   readonly creadoEn: string;
+  /**
+   * Fecha en que se verificó el correo con el código enviado, o `null` (correo.md, RF-USU-05).
+   * Puede faltar en una sesión guardada antes de esta versión: cuenta como sin verificar.
+   */
+  readonly correoVerificadoEn?: string | null;
 }
 
 export interface Sesion {
@@ -47,7 +52,8 @@ export function esUsuario(valor: unknown): valor is Usuario {
     (u['rol'] === 'CLIENTE' || u['rol'] === 'VENDEDOR') &&
     esTextoONulo(u['privacidadAceptadaEn']) &&
     esTextoONulo(u['versionPrivacidad']) &&
-    typeof u['creadoEn'] === 'string'
+    typeof u['creadoEn'] === 'string' &&
+    (u['correoVerificadoEn'] === undefined || esTextoONulo(u['correoVerificadoEn']))
   );
 }
 
@@ -79,4 +85,9 @@ export function accesoVencido(sesion: Sesion, ahora: Date, margenMs = 0): boolea
 /** Primer nombre para el saludo del inicio. */
 export function primerNombre(usuario: Pick<Usuario, 'nombre'>): string {
   return usuario.nombre.trim().split(/\s+/u)[0] ?? usuario.nombre;
+}
+
+/** El correo se verifica con un código enviado a esa dirección (RF-USU-05). */
+export function correoVerificado(usuario: Pick<Usuario, 'correoVerificadoEn'>): boolean {
+  return typeof usuario.correoVerificadoEn === 'string' && usuario.correoVerificadoEn.length > 0;
 }

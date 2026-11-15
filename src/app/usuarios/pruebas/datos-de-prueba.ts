@@ -15,7 +15,14 @@ export const SESION_DE_PRUEBA: Sesion = {
     privacidadAceptadaEn: '2026-11-05T10:15:00-05:00',
     versionPrivacidad: '2026-11-1',
     creadoEn: '2026-11-05T10:15:00-05:00',
+    correoVerificadoEn: null,
   },
+};
+
+/** Cliente cuyo correo ya se verificó con el código enviado (correo.md). */
+export const SESION_CORREO_VERIFICADO: Sesion = {
+  ...SESION_DE_PRUEBA,
+  usuario: { ...SESION_DE_PRUEBA.usuario, correoVerificadoEn: '2026-11-15T09:00:00-05:00' },
 };
 
 export const SESION_RENOVADA: Sesion = {

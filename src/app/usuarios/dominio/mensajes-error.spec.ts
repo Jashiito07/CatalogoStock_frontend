@@ -1,6 +1,6 @@
 import { ErrorApi, ErrorSinConexion } from '../../compartido/dominio/error-api';
 import { ErrorSesionExpirada } from './errores';
-import { mensajeDeError, MENSAJES_ERROR } from './mensajes-error';
+import { mensajeCodigoIncorrecto, mensajeDeError, MENSAJES_ERROR } from './mensajes-error';
 
 describe('Mensajes de error en español (contrato de usuarios)', () => {
   it('CA-01 / D-19: credenciales inválidas → «Correo o clave incorrectos.»', () => {
@@ -74,5 +74,47 @@ describe('Mensajes de recuperación y cambio de clave (RF-USU-05)', () => {
     expect(mensajeDeError(new ErrorSinConexion(), 'clave')).toBe(
       'Necesitas conexión para cambiar tu clave.',
     );
+  });
+});
+describe('Mensajes de verificación y recuperación por correo (correo.md, RF-USU-05)', () => {
+  it('503 CORREO_NO_DISPONIBLE → «No pudimos enviar el correo, intenta de nuevo.»', () => {
+    const error = new ErrorApi(503, 'CORREO_NO_DISPONIBLE', 'x');
+    expect(mensajeDeError(error, 'verificacion')).toBe('No pudimos enviar el correo, intenta de nuevo.');
+    expect(mensajeDeError(new ErrorApi(503, 'ERROR_INTERNO', 'x'), 'verificacion')).toBe(
+      MENSAJES_ERROR.correoNoDisponible,
+    );
+  });
+
+  it('422 por correo no menciona al vendedor; el de la recuperación asistida sí', () => {
+    const error = new ErrorApi(422, 'CODIGO_INVALIDO', 'x');
+    expect(mensajeDeError(error, 'verificacion')).toBe(
+      'El código no es válido o ya venció. Pide uno nuevo.',
+    );
+    expect(mensajeDeError(error, 'recuperacionCorreo')).not.toContain('vendedor');
+    expect(mensajeDeError(error, 'clave')).toContain('vendedor');
+  });
+
+  it('429 incluye la espera; 409 explica que ya está verificado', () => {
+    expect(
+      mensajeDeError(new ErrorApi(429, 'DEMASIADAS_SOLICITUDES', 'x', { reintentarEnSegundos: 30 }), 'verificacion'),
+    ).toContain('(30 s)');
+    expect(mensajeDeError(new ErrorApi(409, 'CORREO_YA_VERIFICADO', 'x'), 'verificacion')).toBe(
+      'Tu correo ya está verificado.',
+    );
+  });
+
+  it('sin conexión: mensajes por contexto', () => {
+    expect(mensajeDeError(new ErrorSinConexion(), 'verificacion')).toBe(
+      'Necesitas conexión para verificar tu correo.',
+    );
+    expect(mensajeDeError(new ErrorSinConexion(), 'recuperacionCorreo')).toBe(
+      MENSAJES_ERROR.claveSinConexion,
+    );
+  });
+
+  it('mensajeCodigoIncorrecto cuenta los intentos hasta 5', () => {
+    expect(mensajeCodigoIncorrecto(1)).toContain('Intento 1 de 5.');
+    expect(mensajeCodigoIncorrecto(4)).toContain('Intento 4 de 5.');
+    expect(mensajeCodigoIncorrecto(5)).toContain('Agotaste los 5 intentos');
   });
 });

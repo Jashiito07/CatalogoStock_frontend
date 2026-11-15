@@ -7,7 +7,9 @@ import { CLASE_TEMA_OSCURO, ServicioTema } from '../../compartido/presentacion/t
 import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
 import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { GestorSesion } from '../../usuarios/aplicacion/gestor-sesion';
-import { SESION_DE_PRUEBA } from '../../usuarios/pruebas/datos-de-prueba';
+import { ConfirmarVerificacionCorreo } from '../../usuarios/aplicacion/casos-uso/confirmar-verificacion-correo.caso-uso';
+import { SolicitarVerificacionCorreo } from '../../usuarios/aplicacion/casos-uso/solicitar-verificacion-correo.caso-uso';
+import { SESION_CORREO_VERIFICADO, SESION_DE_PRUEBA } from '../../usuarios/pruebas/datos-de-prueba';
 import { AlmacenSesionEnMemoria, ConectividadFalsa, crearApiFalsa } from '../../usuarios/pruebas/dobles';
 import { InicioClientePage } from './inicio-cliente.page';
 
@@ -41,8 +43,38 @@ describe('InicioClientePage (PLAN 1.6, D-10)', () => {
         { provide: CONECTIVIDAD, useValue: conectividad },
         { provide: ActualizarUsuarioActual, useValue: { ejecutar: actualizar } },
         { provide: CerrarSesion, useValue: { ejecutar: cerrar } },
+        { provide: SolicitarVerificacionCorreo, useValue: { ejecutar: vi.fn() } },
+        { provide: ConfirmarVerificacionCorreo, useValue: { ejecutar: vi.fn() } },
       ],
     });
+  });
+
+  it('RF-USU-05: mientras correoVerificadoEn sea null muestra «Verifica tu correo» con «Enviar código»', async () => {
+    const { elemento } = await abrir();
+
+    const aviso = elemento.querySelector('app-verificar-correo');
+    expect(aviso?.textContent).toContain('Verifica tu correo');
+    expect(aviso?.textContent).toContain('maria.zambrano@correo.com');
+    expect(aviso?.querySelector('#verificar-enviar')?.textContent).toContain('Enviar código');
+  });
+
+  it('RF-USU-05: el aviso desaparece cuando el correo queda verificado', async () => {
+    const { fixture, elemento, gestor } = await abrir();
+
+    await gestor.actualizarUsuario(SESION_CORREO_VERIFICADO.usuario);
+    fixture.detectChanges();
+
+    expect(elemento.querySelector('app-verificar-correo')).toBeNull();
+  });
+
+  it('RF-USU-05 / RNF-06: sin conexión el aviso no bloquea y explica que se necesita conexión', async () => {
+    conectividad.conectado = false;
+    const { elemento } = await abrir();
+
+    const aviso = elemento.querySelector('app-verificar-correo');
+    expect(aviso?.textContent).toContain('Necesitas conexión para verificar tu correo.');
+    expect(aviso?.querySelector('#verificar-enviar')).toBeNull();
+    expect(elemento.textContent).toContain('Cambiar mi clave');
   });
 
   it('saluda al Cliente por su nombre y muestra el botón de cerrar sesión', async () => {

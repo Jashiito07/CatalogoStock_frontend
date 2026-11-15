@@ -30,6 +30,15 @@ export function crearApiFalsa(): Mocked<ApiUsuarios> {
     ),
     recuperarClave: vi.fn<ApiUsuarios['recuperarClave']>(async () => undefined),
     cambiarClave: vi.fn<ApiUsuarios['cambiarClave']>(async () => undefined),
+    solicitarVerificacionCorreo: vi.fn<ApiUsuarios['solicitarVerificacionCorreo']>(
+      async () => undefined,
+    ),
+    confirmarVerificacionCorreo: vi.fn<ApiUsuarios['confirmarVerificacionCorreo']>(
+      async () => undefined,
+    ),
+    solicitarRecuperacionPorCorreo: vi.fn<ApiUsuarios['solicitarRecuperacionPorCorreo']>(
+      async () => undefined,
+    ),
   };
 }
 

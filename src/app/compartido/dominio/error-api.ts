@@ -64,5 +64,8 @@ export const CODIGOS_ERROR = {
   // recuperacion-clave.md (RF-USU-05).
   codigoInvalido: 'CODIGO_INVALIDO',
   claveActualIncorrecta: 'CLAVE_ACTUAL_INCORRECTA',
+  // correo.md (RF-USU-05, D-50).
+  correoYaVerificado: 'CORREO_YA_VERIFICADO',
+  correoNoDisponible: 'CORREO_NO_DISPONIBLE',
   errorInterno: 'ERROR_INTERNO',
 } as const;

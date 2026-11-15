@@ -6,7 +6,7 @@ import { URL_API } from '../../compartido/compartido.providers';
 import { ErrorApi, ErrorSinConexion } from '../../compartido/dominio/error-api';
 import { SESION_DE_PRUEBA } from '../pruebas/datos-de-prueba';
 import { AVISO_DE_PRUEBA } from '../pruebas/dobles';
-import { ApiUsuariosHttp } from './api-usuarios.http';
+import { ApiUsuariosHttp, RUTAS_PUBLICAS } from './api-usuarios.http';
 
 const URL = 'http://api.prueba/api/v1';
 
@@ -194,5 +194,107 @@ describe('ApiUsuariosHttp (docs/contrato-api/recuperacion-clave.md, RF-USU-05)',
     const sinRed = api.cambiarClave(solicitud);
     controlador.expectOne(`${URL}/usuarios/yo/clave`).error(new ProgressEvent('error'), { status: 0 });
     await expect(sinRed).rejects.toBeInstanceOf(ErrorSinConexion);
+  });
+});
+describe('ApiUsuariosHttp (docs/contrato-api/correo.md, RF-USU-05, D-50)', () => {
+  let api: ApiUsuariosHttp;
+  let controlador: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: URL_API, useValue: URL }],
+    });
+    api = TestBed.inject(ApiUsuariosHttp);
+    controlador = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => controlador.verify());
+
+  it('POST /usuarios/yo/correo/verificacion sin datos → 204', async () => {
+    const promesa = api.solicitarVerificacionCorreo();
+
+    const peticion = controlador.expectOne(`${URL}/usuarios/yo/correo/verificacion`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({});
+    peticion.flush(null, { status: 204, statusText: 'Sin contenido' });
+
+    await expect(promesa).resolves.toBeUndefined();
+  });
+
+  it.each([
+    [409, 'CORREO_YA_VERIFICADO'],
+    [429, 'DEMASIADAS_SOLICITUDES'],
+    [503, 'CORREO_NO_DISPONIBLE'],
+  ])('verificación: %i %s llega como ErrorApi con el código del contrato', async (estado, codigo) => {
+    const promesa = api.solicitarVerificacionCorreo();
+    controlador
+      .expectOne(`${URL}/usuarios/yo/correo/verificacion`)
+      .flush({ codigo, mensaje: 'x', detalles: {} }, { status: estado, statusText: 'Error' });
+
+    await expect(promesa).rejects.toMatchObject({ estado, codigo });
+  });
+
+  it('503 sin cuerpo también se reconoce como error de la API', async () => {
+    const promesa = api.solicitarVerificacionCorreo();
+    controlador
+      .expectOne(`${URL}/usuarios/yo/correo/verificacion`)
+      .flush(null, { status: 503, statusText: 'Service Unavailable' });
+
+    const error = await promesa.catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect((error as ErrorApi).estado).toBe(503);
+  });
+
+  it('POST /usuarios/yo/correo/confirmacion con { codigo } → 204', async () => {
+    const promesa = api.confirmarVerificacionCorreo('482913');
+
+    const peticion = controlador.expectOne(`${URL}/usuarios/yo/correo/confirmacion`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ codigo: '482913' });
+    peticion.flush(null, { status: 204, statusText: 'Sin contenido' });
+
+    await expect(promesa).resolves.toBeUndefined();
+  });
+
+  it('confirmación: 422 CODIGO_INVALIDO y 429 con reintentarEnSegundos', async () => {
+    const invalido = api.confirmarVerificacionCorreo('000000');
+    controlador
+      .expectOne(`${URL}/usuarios/yo/correo/confirmacion`)
+      .flush(
+        { codigo: 'CODIGO_INVALIDO', mensaje: 'x', detalles: {} },
+        { status: 422, statusText: 'Unprocessable Entity' },
+      );
+    await expect(invalido).rejects.toMatchObject({ estado: 422, codigo: 'CODIGO_INVALIDO' });
+
+    const limitado = api.confirmarVerificacionCorreo('000000');
+    controlador.expectOne(`${URL}/usuarios/yo/correo/confirmacion`).flush(
+      { codigo: 'DEMASIADAS_SOLICITUDES', mensaje: 'x', detalles: { reintentarEnSegundos: 45 } },
+      { status: 429, statusText: 'Too Many Requests' },
+    );
+    const error = await limitado.catch((e: unknown) => e);
+    expect((error as ErrorApi).reintentarEnSegundos).toBe(45);
+  });
+
+  it('POST /autenticacion/recuperacion/solicitud con { correo } → 204, sin token (ruta pública)', async () => {
+    const promesa = api.solicitarRecuperacionPorCorreo('maria.zambrano@correo.com');
+
+    const peticion = controlador.expectOne(`${URL}/autenticacion/recuperacion/solicitud`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ correo: 'maria.zambrano@correo.com' });
+    peticion.flush(null, { status: 204, statusText: 'Sin contenido' });
+
+    await expect(promesa).resolves.toBeUndefined();
+    expect(RUTAS_PUBLICAS).toContain('/autenticacion/recuperacion/solicitud');
+    expect(RUTAS_PUBLICAS).not.toContain('/usuarios/yo/correo/verificacion');
+    expect(RUTAS_PUBLICAS).not.toContain('/usuarios/yo/correo/confirmacion');
+  });
+
+  it('sin conexión → ErrorSinConexion', async () => {
+    const promesa = api.solicitarRecuperacionPorCorreo('maria@correo.com');
+    controlador
+      .expectOne(`${URL}/autenticacion/recuperacion/solicitud`)
+      .error(new ProgressEvent('error'), { status: 0 });
+
+    await expect(promesa).rejects.toBeInstanceOf(ErrorSinConexion);
   });
 });
