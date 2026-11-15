@@ -51,4 +51,16 @@ export interface ApiUsuarios {
   recuperarClave(solicitud: SolicitudRecuperacion): Promise<void>;
   /** Con sesión; responde 204 (RF-USU-05). */
   cambiarClave(solicitud: SolicitudCambioClave): Promise<void>;
+  /**
+   * `POST /usuarios/yo/correo/verificacion` (correo.md): envía un código al correo
+   * registrado de la cuenta. Responde 204; 409, 429 y 503 llegan como `ErrorApi`.
+   */
+  solicitarVerificacionCorreo(): Promise<void>;
+  /** `POST /usuarios/yo/correo/confirmacion` con `{ codigo }`; 204 marca el correo como verificado. */
+  confirmarVerificacionCorreo(codigo: string): Promise<void>;
+  /**
+   * `POST /autenticacion/recuperacion/solicitud` (público, correo.md). Responde 204
+   * siempre, exista o no la cuenta: no revela qué correos están registrados.
+   */
+  solicitarRecuperacionPorCorreo(correo: string): Promise<void>;
 }

@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 import { ButtonDirective } from 'primeng/button';
@@ -17,6 +17,7 @@ import { InputGroup } from 'primeng/inputgroup';
 import { InputPassword } from 'primeng/inputpassword';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
+import { SelectButton } from 'primeng/selectbutton';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
 import { CODIGOS_ERROR, ErrorApi } from '../../compartido/dominio/error-api';
@@ -32,12 +33,15 @@ import {
   MENSAJES_VALIDACION,
 } from '../dominio/validaciones-usuario';
 import { MOTIVO_CLAVE_RESTABLECIDA } from './ingreso.page';
+import { RecuperarPorCorreoComponent } from './recuperar-por-correo.component';
 import {
   igualA,
   marcarErrorServidor,
   mensajeDeControl,
   reglaDominio,
 } from './validadores-formulario';
+
+type ModoRecuperacion = 'correo' | 'vendedor';
 
 /**
  * Recuperar clave (RF-USU-05, D-35, D-39; contrato recuperacion-clave.md, «App móvil»).
@@ -50,7 +54,10 @@ import {
     IonContent,
     LogoComponent,
     ReactiveFormsModule,
+    FormsModule,
     RouterLink,
+    SelectButton,
+    RecuperarPorCorreoComponent,
     Card,
     ButtonDirective,
     InputText,
@@ -79,6 +86,17 @@ export class RecuperarClavePage implements OnInit {
     claveNueva: ['', [reglaDominio(esClaveValida, MENSAJES_VALIDACION.clave)]],
     confirmacionClave: ['', [igualA('claveNueva', MENSAJES_VALIDACION.confirmacionClave)]],
   });
+
+  /** Dos caminos (correo.md): código al correo (por defecto) o código del vendedor. */
+  protected readonly opcionesModo: { etiqueta: string; valor: ModoRecuperacion }[] = [
+    { etiqueta: 'Por correo', valor: 'correo' },
+    { etiqueta: 'Con mi vendedor', valor: 'vendedor' },
+  ];
+  protected readonly modo = signal<ModoRecuperacion>('correo');
+
+  protected elegirModo(modo: ModoRecuperacion | null): void {
+    if (modo) this.modo.set(modo);
+  }
 
   protected readonly enLinea = signal(true);
   protected readonly enviando = signal(false);

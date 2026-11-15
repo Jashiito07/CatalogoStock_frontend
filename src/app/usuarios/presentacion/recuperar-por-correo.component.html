@@ -1,0 +1,170 @@
+<p-card>
+  @if (paso() === 'correo') {
+    <form class="cs-formulario" (submit)="$event.preventDefault(); enviarCodigo()" novalidate>
+      <p class="cs-ayuda">
+        Escribe el correo de tu cuenta. Si ya lo verificaste, te enviaremos un código de 6
+        dígitos.
+      </p>
+      <div class="cs-campo">
+        <label for="correo-recuperar-correo">Correo</label>
+        <input
+          pInputText
+          id="correo-recuperar-correo"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          [formControl]="correo"
+          [fluid]="true"
+          [invalid]="!!errorCorreo()"
+          [attr.aria-describedby]="errorCorreo() ? 'correo-recuperar-correo-error' : null"
+        />
+        @if (errorCorreo(); as mensaje) {
+          <p-message id="correo-recuperar-correo-error" severity="error" size="small" variant="simple">
+            {{ mensaje }}
+          </p-message>
+        }
+      </div>
+
+      @if (errorSolicitud(); as mensaje) {
+        <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+      }
+
+      <div class="cs-acciones">
+        <button
+          pButton
+          id="correo-enviar-codigo"
+          type="submit"
+          [fluid]="true"
+          [loading]="solicitando()"
+          [disabled]="solicitando() || !enLinea() || espera.segundos() > 0"
+        >
+          <i class="pi pi-send" aria-hidden="true"></i>
+          Enviar código a mi correo
+        </button>
+        @if (espera.segundos() > 0) {
+          <p class="cs-ayuda" role="status">
+            Podrás pedir otro código en {{ formatearEspera(espera.segundos()) }}.
+          </p>
+        }
+        @if (!enLinea()) {
+          <p class="cs-ayuda">{{ textoSinConexion }}</p>
+        }
+      </div>
+    </form>
+  } @else {
+    <form class="cs-formulario" [formGroup]="formulario" (ngSubmit)="restablecer()" novalidate>
+      <!-- Mismo mensaje exista o no la cuenta: no revela qué correos están registrados. -->
+      <p-message id="correo-mensaje-neutro" severity="info" icon="pi pi-envelope" role="status">
+        {{ mensajeNeutro }}
+      </p-message>
+
+      <div class="cs-campo">
+        <label for="correo-recuperar-codigo">Código de 6 dígitos</label>
+        <input
+          pInputText
+          id="correo-recuperar-codigo"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          placeholder="000000"
+          formControlName="codigo"
+          [fluid]="true"
+          [invalid]="!!errorDe('codigo')"
+        />
+        @if (errorDe('codigo'); as mensaje) {
+          <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+        }
+      </div>
+
+      <div class="cs-campo">
+        <label for="correo-recuperar-clave">Clave nueva</label>
+        <p-inputgroup>
+          <input
+            pInputPassword
+            id="correo-recuperar-clave"
+            autocomplete="new-password"
+            formControlName="claveNueva"
+            [mask]="claveOculta()"
+            [invalid]="!!errorDe('claveNueva')"
+            aria-describedby="correo-recuperar-clave-ayuda"
+          />
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            [outlined]="true"
+            [iconOnly]="true"
+            [attr.aria-label]="claveOculta() ? 'Mostrar claves' : 'Ocultar claves'"
+            [attr.aria-pressed]="!claveOculta()"
+            (click)="claveOculta.set(!claveOculta())"
+          >
+            <i class="pi" [class.pi-eye]="claveOculta()" [class.pi-eye-slash]="!claveOculta()" aria-hidden="true"></i>
+          </button>
+        </p-inputgroup>
+        <p id="correo-recuperar-clave-ayuda" class="cs-ayuda">
+          De 8 a 72 caracteres, con al menos una letra y un número.
+        </p>
+        @if (errorDe('claveNueva'); as mensaje) {
+          <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+        }
+      </div>
+
+      <div class="cs-campo">
+        <label for="correo-recuperar-confirmacion">Repite tu clave nueva</label>
+        <input
+          pInputPassword
+          id="correo-recuperar-confirmacion"
+          autocomplete="new-password"
+          formControlName="confirmacionClave"
+          [mask]="claveOculta()"
+          [fluid]="true"
+          [invalid]="!!errorDe('confirmacionClave')"
+        />
+        @if (errorDe('confirmacionClave'); as mensaje) {
+          <p-message severity="error" size="small" variant="simple">{{ mensaje }}</p-message>
+        }
+      </div>
+
+      @if (errorGeneral(); as mensaje) {
+        <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+      }
+
+      <div class="cs-acciones">
+        <button
+          pButton
+          id="correo-restablecer"
+          type="submit"
+          [fluid]="true"
+          [loading]="restableciendo()"
+          [disabled]="restableciendo() || !enLinea()"
+        >
+          <i class="pi pi-key" aria-hidden="true"></i>
+          Restablecer clave
+        </button>
+        <button
+          pButton
+          id="correo-reenviar"
+          type="button"
+          severity="secondary"
+          [outlined]="true"
+          [fluid]="true"
+          [disabled]="solicitando() || !enLinea() || espera.segundos() > 0"
+          (click)="enviarCodigo()"
+        >
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          {{ espera.segundos() > 0 ? 'Reenviar código en ' + formatearEspera(espera.segundos()) : 'Reenviar código' }}
+        </button>
+        @if (errorSolicitud(); as mensaje) {
+          <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+        }
+        @if (!enLinea()) {
+          <p class="cs-ayuda">{{ textoSinConexion }}</p>
+        }
+        <button pButton type="button" severity="secondary" [text]="true" [fluid]="true" (click)="usarOtroCorreo()">
+          Usar otro correo
+        </button>
+      </div>
+    </form>
+  }
+</p-card>

@@ -27,6 +27,10 @@ export const RUTAS_USUARIOS = {
   // recuperacion-clave.md (RF-USU-05).
   recuperacion: '/autenticacion/recuperacion',
   cambioClave: '/usuarios/yo/clave',
+  // correo.md (RF-USU-05, D-50).
+  solicitudRecuperacion: '/autenticacion/recuperacion/solicitud',
+  verificacionCorreo: '/usuarios/yo/correo/verificacion',
+  confirmacionCorreo: '/usuarios/yo/correo/confirmacion',
 } as const;
 
 /** Rutas públicas: nunca llevan el token de acceso ni se renuevan ante un 401. */
@@ -36,6 +40,7 @@ export const RUTAS_PUBLICAS: readonly string[] = [
   RUTAS_USUARIOS.renovacion,
   RUTAS_USUARIOS.avisoPrivacidad,
   RUTAS_USUARIOS.recuperacion,
+  RUTAS_USUARIOS.solicitudRecuperacion,
 ];
 
 function respuestaInvalida(): ErrorApi {
@@ -101,6 +106,22 @@ export class ApiUsuariosHttp implements ApiUsuarios {
 
   async cambiarClave(solicitud: SolicitudCambioClave): Promise<void> {
     await this.solicitar(this.http.post<unknown>(this.url(RUTAS_USUARIOS.cambioClave), solicitud));
+  }
+
+  async solicitarVerificacionCorreo(): Promise<void> {
+    await this.solicitar(this.http.post<unknown>(this.url(RUTAS_USUARIOS.verificacionCorreo), {}));
+  }
+
+  async confirmarVerificacionCorreo(codigo: string): Promise<void> {
+    await this.solicitar(
+      this.http.post<unknown>(this.url(RUTAS_USUARIOS.confirmacionCorreo), { codigo }),
+    );
+  }
+
+  async solicitarRecuperacionPorCorreo(correo: string): Promise<void> {
+    await this.solicitar(
+      this.http.post<unknown>(this.url(RUTAS_USUARIOS.solicitudRecuperacion), { correo }),
+    );
   }
 
   private url(ruta: string): string {

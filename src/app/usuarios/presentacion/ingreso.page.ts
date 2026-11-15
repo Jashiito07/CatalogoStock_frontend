@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
@@ -15,6 +16,7 @@ import { InputGroup } from 'primeng/inputgroup';
 import { InputPassword } from 'primeng/inputpassword';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
+import { map } from 'rxjs';
 
 import { URL_PANEL } from '../../compartido/compartido.providers';
 import { ErrorApi } from '../../compartido/dominio/error-api';
@@ -88,7 +90,15 @@ export class IngresoPage {
   protected readonly enviado = signal(false);
   protected readonly claveOculta = signal(true);
   protected readonly errorGeneral = signal<string | null>(null);
-  protected readonly aviso = signal<AvisoIngreso | null>(this.avisoInicial());
+  /**
+   * Se calcula con el parámetro `motivo` de cada navegación, no solo al crear la página:
+   * `ion-router-outlet` conserva la página de ingreso al abrir «Recuperar clave», y al
+   * volver (con `?motivo=clave-restablecida`) reutiliza esa misma instancia.
+   */
+  protected readonly aviso = toSignal(
+    inject(ActivatedRoute).queryParamMap.pipe(map((parametros) => this.avisoDe(parametros.get('motivo')))),
+    { initialValue: null },
+  );
 
   protected errorDe(campo: CampoIngreso): string | null {
     const control = this.formulario.controls[campo];
@@ -135,8 +145,7 @@ export class IngresoPage {
     this.errorGeneral.set(mensajeDeError(error, 'ingreso'));
   }
 
-  private avisoInicial(): AvisoIngreso | null {
-    const motivo = inject(ActivatedRoute).snapshot.queryParamMap.get('motivo');
+  private avisoDe(motivo: string | null): AvisoIngreso | null {
     if (motivo === MOTIVO_SESION_EXPIRADA) {
       return { severidad: 'warn', texto: MENSAJES_ERROR.sesionExpirada };
     }

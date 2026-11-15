@@ -25,7 +25,8 @@ import { LogoComponent } from '../../compartido/presentacion/logo/logo.component
 import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
 import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
 import { GestorSesion } from '../../usuarios/aplicacion/gestor-sesion';
-import { primerNombre, Usuario } from '../../usuarios/dominio/sesion';
+import { correoVerificado, primerNombre, Usuario } from '../../usuarios/dominio/sesion';
+import { VerificarCorreoComponent } from '../../usuarios/presentacion/verificar-correo.component';
 
 /**
  * Inicio del Cliente (PLAN 1.6): saludo, nombre, «Cambiar mi clave» (RF-USU-05) y cerrar
@@ -46,6 +47,7 @@ import { primerNombre, Usuario } from '../../usuarios/dominio/sesion';
     Message,
     SelectButton,
     Tag,
+    VerificarCorreoComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './inicio-cliente.page.html',
@@ -75,6 +77,11 @@ export class InicioClientePage implements OnInit {
   protected readonly usuario = signal<Usuario | null>(this.gestor.actual()?.usuario ?? null);
   protected readonly enLinea = signal(true);
   protected readonly cerrando = signal(false);
+  /** RF-USU-05: se avisa mientras `correoVerificadoEn` sea nulo (no bloquea el acceso). */
+  protected readonly sinVerificar = computed(() => {
+    const usuario = this.usuario();
+    return usuario !== null && !correoVerificado(usuario);
+  });
   protected readonly saludo = computed(() => {
     const usuario = this.usuario();
     return usuario ? `¡Hola, ${primerNombre(usuario)}!` : '¡Hola!';

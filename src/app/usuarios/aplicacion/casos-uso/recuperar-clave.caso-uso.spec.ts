@@ -1,6 +1,8 @@
 import { ErrorApi, ErrorSinConexion } from '../../../compartido/dominio/error-api';
 import { ErrorDatosFormulario } from '../../dominio/errores';
-import { ConectividadFalsa, crearApiFalsa } from '../../pruebas/dobles';
+import { SESION_DE_PRUEBA } from '../../pruebas/datos-de-prueba';
+import { AlmacenSesionEnMemoria, ConectividadFalsa, crearApiFalsa } from '../../pruebas/dobles';
+import { GestorSesion } from '../gestor-sesion';
 import { RecuperarClave } from './recuperar-clave.caso-uso';
 
 const DATOS = {
@@ -10,10 +12,38 @@ const DATOS = {
   confirmacionClave: 'NuevaClave2026',
 };
 
-describe('RecuperarClave (RF-USU-05, D-35, D-39)', () => {
+function crear(api: ReturnType<typeof crearApiFalsa>, conectividad: ConectividadFalsa) {
+  const almacen = new AlmacenSesionEnMemoria(SESION_DE_PRUEBA);
+  const gestor = new GestorSesion(api, almacen);
+  return { caso: new RecuperarClave(api, conectividad, gestor), almacen, gestor };
+}
+
+describe('RecuperarClave (RF-USU-05, D-35, D-39, D-50)', () => {
+  it('RF-USU-05: al recuperar la clave borra la sesión local (el servidor revocó todas)', async () => {
+    const api = crearApiFalsa();
+    const { caso, almacen, gestor } = crear(api, new ConectividadFalsa(true));
+    await gestor.restaurar();
+
+    await caso.ejecutar(DATOS);
+
+    expect(gestor.actual()).toBeNull();
+    expect(almacen.guardada).toBeNull();
+  });
+
+  it('si la API rechaza el código, conserva la sesión local', async () => {
+    const api = crearApiFalsa();
+    api.recuperarClave.mockRejectedValue(new ErrorApi(422, 'CODIGO_INVALIDO', 'x'));
+    const { caso, almacen, gestor } = crear(api, new ConectividadFalsa(true));
+    await gestor.restaurar();
+
+    await caso.ejecutar(DATOS).catch(() => undefined);
+
+    expect(almacen.guardada).toEqual(SESION_DE_PRUEBA);
+  });
+
   it('envía correo normalizado, código de 6 dígitos y clave nueva al contrato', async () => {
     const api = crearApiFalsa();
-    const caso = new RecuperarClave(api, new ConectividadFalsa(true));
+    const caso = crear(api, new ConectividadFalsa(true)).caso;
 
     await caso.ejecutar(DATOS);
 
@@ -26,7 +56,7 @@ describe('RecuperarClave (RF-USU-05, D-35, D-39)', () => {
 
   it('valida antes de llamar a la API: código, reglas de la clave y confirmación', async () => {
     const api = crearApiFalsa();
-    const caso = new RecuperarClave(api, new ConectividadFalsa(true));
+    const caso = crear(api, new ConectividadFalsa(true)).caso;
 
     const error = await caso
       .ejecutar({ correo: 'maria@', codigo: '12345', claveNueva: 'corta', confirmacionClave: 'otra' })
@@ -44,7 +74,7 @@ describe('RecuperarClave (RF-USU-05, D-35, D-39)', () => {
 
   it('sin conexión no llama a la API', async () => {
     const api = crearApiFalsa();
-    const caso = new RecuperarClave(api, new ConectividadFalsa(false));
+    const caso = crear(api, new ConectividadFalsa(false)).caso;
 
     await expect(caso.ejecutar(DATOS)).rejects.toBeInstanceOf(ErrorSinConexion);
     expect(api.recuperarClave).not.toHaveBeenCalled();
@@ -55,7 +85,7 @@ describe('RecuperarClave (RF-USU-05, D-35, D-39)', () => {
     api.recuperarClave.mockRejectedValue(
       new ErrorApi(422, 'CODIGO_INVALIDO', 'El código no es válido o ya venció.'),
     );
-    const caso = new RecuperarClave(api, new ConectividadFalsa(true));
+    const caso = crear(api, new ConectividadFalsa(true)).caso;
 
     await expect(caso.ejecutar(DATOS)).rejects.toMatchObject({ codigo: 'CODIGO_INVALIDO' });
   });
