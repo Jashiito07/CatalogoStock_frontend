@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { MessageService } from 'primeng/api';
 
 import { ErrorApi, ErrorSinConexion } from '../../compartido/dominio/error-api';
@@ -62,6 +63,7 @@ describe('RegistroPage (RF-USU-01, RNF-16, PA-12)', () => {
         provideRouter([
           { path: 'inicio', children: [] },
           { path: 'ingreso', children: [] },
+          { path: 'registro', component: RegistroPage },
         ]),
         MessageService,
         { provide: RegistrarCliente, useValue: { ejecutar: registrar } },
@@ -161,6 +163,37 @@ describe('RegistroPage (RF-USU-01, RNF-16, PA-12)', () => {
     expect(consultarAviso).toHaveBeenCalledTimes(2);
     expect(elemento.querySelector<HTMLInputElement>('#registro-privacidad')?.checked).toBe(false);
     expect(elemento.textContent).toContain('El aviso de privacidad cambió.');
+  });
+
+  describe('correo que llega desde el ingreso (D-52)', () => {
+    async function abrirConCorreo(correo: string): Promise<HTMLElement> {
+      const harness = await RouterTestingHarness.create();
+      await harness.navigateByUrl(`/registro?correo=${encodeURIComponent(correo)}`, RegistroPage);
+      await esperar();
+      harness.detectChanges();
+      return harness.routeNativeElement as HTMLElement;
+    }
+
+    it('rellena el correo escrito en el ingreso', async () => {
+      const raiz = await abrirConCorreo('nueva@correo.com');
+
+      expect(raiz.querySelector<HTMLInputElement>('#registro-correo')?.value).toBe('nueva@correo.com');
+      expect(raiz.textContent).not.toContain('Ingrese un correo válido.');
+    });
+
+    it('lo valida como siempre: un correo con formato inválido muestra el error', async () => {
+      const raiz = await abrirConCorreo('nueva@');
+
+      expect(raiz.querySelector<HTMLInputElement>('#registro-correo')?.value).toBe('nueva@');
+      expect(raiz.textContent).toContain('Ingrese un correo válido.');
+      expect(registrar).not.toHaveBeenCalled();
+    });
+
+    it('sin parámetro el correo queda vacío', async () => {
+      await abrir();
+
+      expect(elemento.querySelector<HTMLInputElement>('#registro-correo')?.value).toBe('');
+    });
   });
 
   it('sin conexión y sin aviso guardado ofrece reintentar y no deja enviar', async () => {

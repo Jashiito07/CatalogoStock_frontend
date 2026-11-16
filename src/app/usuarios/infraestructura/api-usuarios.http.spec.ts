@@ -102,6 +102,21 @@ describe('ApiUsuariosHttp (docs/contrato-api/usuarios.md)', () => {
     expect((error as ErrorApi).erroresDeCampo[0].campo).toBe('telefono');
   });
 
+  it.each([
+    [401, 'CORREO_NO_REGISTRADO'],
+    [403, 'CUENTA_DESACTIVADA'],
+  ])('D-52: el ingreso convierte %i %s en ErrorApi con el código del contrato', async (estado, codigo) => {
+    const promesa = api.ingresarCliente({ correo: 'a@b.com', clave: 'x' });
+    controlador
+      .expectOne(`${URL}/autenticacion/ingreso/cliente`)
+      .flush({ codigo, mensaje: 'x' }, { status: estado, statusText: 'Error' });
+
+    const error = await promesa.catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect((error as ErrorApi).codigo).toBe(codigo);
+    expect((error as ErrorApi).estado).toBe(estado);
+  });
+
   it('sin respuesta del servidor lanza ErrorSinConexion', async () => {
     const promesa = api.ingresarCliente({ correo: 'a@b.com', clave: 'x' });
     controlador.expectOne(`${URL}/autenticacion/ingreso/cliente`).error(new ProgressEvent('error'), { status: 0 });

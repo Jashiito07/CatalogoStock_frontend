@@ -39,6 +39,20 @@ describe('IniciarSesion (RF-USU-01, CA-01, D-19)', () => {
     expect(almacen.guardada).toBeNull();
   });
 
+  it.each([
+    [401, 'CORREO_NO_REGISTRADO'],
+    [403, 'CUENTA_DESACTIVADA'],
+  ])('D-52: el código %i %s llega intacto y no guarda sesión', async (estado, codigo) => {
+    const { api, almacen, caso } = preparar();
+    api.ingresarCliente.mockRejectedValue(new ErrorApi(estado, codigo, 'x'));
+
+    await expect(caso.ejecutar({ correo: 'maria@correo.com', clave: 'Otra2026' })).rejects.toMatchObject({
+      estado,
+      codigo,
+    });
+    expect(almacen.guardada).toBeNull();
+  });
+
   it('PLAN 1.6: sin conexión no intenta ingresar', async () => {
     const { api, caso } = preparar(false);
 

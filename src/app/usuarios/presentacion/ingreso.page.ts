@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   inject,
   signal,
 } from '@angular/core';
@@ -19,13 +20,17 @@ import { Message } from 'primeng/message';
 import { map } from 'rxjs';
 
 import { URL_PANEL } from '../../compartido/compartido.providers';
-import { ErrorApi } from '../../compartido/dominio/error-api';
+import { CODIGOS_ERROR, ErrorApi } from '../../compartido/dominio/error-api';
 import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
 import { IniciarSesion } from '../aplicacion/casos-uso/iniciar-sesion.caso-uso';
 import { ErrorDatosFormulario } from '../dominio/errores';
 import { mensajeDeError, MENSAJES_ERROR } from '../dominio/mensajes-error';
 import { primerNombre } from '../dominio/sesion';
-import { esCorreoValido, MENSAJES_VALIDACION } from '../dominio/validaciones-usuario';
+import {
+  esCorreoValido,
+  MENSAJES_VALIDACION,
+  normalizarCorreo,
+} from '../dominio/validaciones-usuario';
 import { MOTIVO_SESION_EXPIRADA } from '../infraestructura/interceptor-autenticacion';
 import { marcarErrorServidor, mensajeDeControl, reglaDominio } from './validadores-formulario';
 
@@ -36,6 +41,9 @@ export const MOTIVO_CUENTA_CREADA = 'cuenta-creada';
 export const MOTIVO_CLAVE_RESTABLECIDA = 'clave-restablecida';
 
 export const TEXTO_CLAVE_RESTABLECIDA = 'Tu clave se cambió. Inicia sesión con tu nueva clave.';
+
+/** Parámetro de navegación con el que el ingreso envía al registro el correo escrito (D-52). */
+export const PARAMETRO_CORREO = 'correo';
 
 type CampoIngreso = 'correo' | 'clave';
 
@@ -74,6 +82,7 @@ export class IngresoPage {
   private readonly router = inject(Router);
   private readonly mensajes = inject(MessageService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly anfitrion = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly formulario = inject(FormBuilder).nonNullable.group({
     correo: [
@@ -90,6 +99,8 @@ export class IngresoPage {
   protected readonly enviado = signal(false);
   protected readonly claveOculta = signal(true);
   protected readonly errorGeneral = signal<string | null>(null);
+  /** D-52: el error actual es «correo sin cuenta» y se ofrece «Crear cuenta». */
+  protected readonly sinCuenta = signal(false);
   /**
    * Se calcula con el parámetro `motivo` de cada navegación, no solo al crear la página:
    * `ion-router-outlet` conserva la página de ingreso al abrir «Recuperar clave», y al
@@ -109,6 +120,7 @@ export class IngresoPage {
     if (this.enviando()) return;
     this.enviado.set(true);
     this.errorGeneral.set(null);
+    this.sinCuenta.set(false);
     this.formulario.markAllAsTouched();
     if (this.formulario.invalid) return;
 
@@ -142,7 +154,30 @@ export class IngresoPage {
         if (errores[0]) marcarErrorServidor(this.formulario, campo, errores[0]);
       }
     }
+    // D-52: un solo mensaje a la vez; solo «correo sin cuenta» ofrece crearla.
+    const correoNoRegistrado =
+      error instanceof ErrorApi && error.codigo === CODIGOS_ERROR.correoNoRegistrado;
+    this.sinCuenta.set(correoNoRegistrado);
     this.errorGeneral.set(mensajeDeError(error, 'ingreso'));
+    this.enfocarError(correoNoRegistrado);
+  }
+
+  /** Lleva al registro con el correo escrito; el registro lo valida como cualquier otro. */
+  protected async crearCuenta(): Promise<void> {
+    const correo = normalizarCorreo(this.formulario.controls.correo.value);
+    await this.router.navigate(['/registro'], {
+      queryParams: correo.length > 0 ? { [PARAMETRO_CORREO]: correo } : {},
+    });
+  }
+
+  /** El foco va al botón «Crear cuenta» si existe; si no, al mensaje (lectores de pantalla). */
+  private enfocarError(haciaBoton: boolean): void {
+    this.cdr.detectChanges();
+    const raiz = this.anfitrion.nativeElement;
+    const destino = haciaBoton
+      ? raiz.querySelector<HTMLElement>('#ingreso-crear-cuenta')
+      : raiz.querySelector<HTMLElement>('#ingreso-error');
+    destino?.focus();
   }
 
   private avisoDe(motivo: string | null): AvisoIngreso | null {

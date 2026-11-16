@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 import { MessageService } from 'primeng/api';
 import { ButtonDirective } from 'primeng/button';
@@ -40,7 +40,7 @@ import {
   esTelefonoValido,
   MENSAJES_VALIDACION,
 } from '../dominio/validaciones-usuario';
-import { MOTIVO_CUENTA_CREADA } from './ingreso.page';
+import { MOTIVO_CUENTA_CREADA, PARAMETRO_CORREO } from './ingreso.page';
 import {
   casillaMarcada,
   igualA,
@@ -92,6 +92,7 @@ export class RegistroPage implements OnInit {
   private readonly registrarCliente = inject(RegistrarCliente);
   private readonly consultarAviso = inject(ConsultarAvisoPrivacidad);
   private readonly router = inject(Router);
+  private readonly ruta = inject(ActivatedRoute);
   private readonly mensajes = inject(MessageService);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -121,6 +122,15 @@ export class RegistroPage implements OnInit {
     this.formulario.controls.clave.valueChanges.pipe(takeUntilDestroyed()).subscribe(() =>
       this.formulario.controls.confirmacionClave.updateValueAndValidity({ emitEvent: false }),
     );
+
+    // D-52: el ingreso puede enviar el correo escrito. Solo rellena el campo: el correo se
+    // valida como siempre (formato al enviar y en el servidor).
+    this.ruta.queryParamMap.pipe(takeUntilDestroyed()).subscribe((parametros) => {
+      const correo = parametros.get(PARAMETRO_CORREO)?.trim() ?? '';
+      if (correo.length === 0 || correo.length > 254) return;
+      this.formulario.controls.correo.setValue(correo);
+      this.formulario.controls.correo.markAsTouched();
+    });
   }
 
   ngOnInit(): void {

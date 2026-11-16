@@ -13,6 +13,10 @@ export type ContextoError =
 
 export const MENSAJES_ERROR = {
   credencialesInvalidas: 'Correo o clave incorrectos.',
+  /** D-52: solo el ingreso de la app revela que el correo no tiene cuenta. */
+  correoNoRegistrado: 'No existe una cuenta registrada con ese correo.',
+  /** D-52: solo se avisa si la clave era correcta. */
+  cuentaDesactivada: 'Tu cuenta está desactivada. Contacta a tu vendedor.',
   correoYaRegistrado: 'Ya existe una cuenta con ese correo. Inicie sesión o use otro correo.',
   privacidadNoAceptada: 'Debe aceptar el aviso de privacidad para crear su cuenta.',
   privacidadDesactualizada:
@@ -72,9 +76,14 @@ export function mensajeDeError(error: unknown, contexto: ContextoError = 'genera
   }
 
   switch (error.codigo) {
-    // D-19: mismo mensaje para clave incorrecta, correo inexistente o rol no permitido.
+    // D-19 / D-52: clave incorrecta o rol no permitido comparten un mensaje; el correo sin
+    // cuenta y la cuenta desactivada (con clave correcta) tienen el suyo en la app.
     case CODIGOS_ERROR.credencialesInvalidas:
       return MENSAJES_ERROR.credencialesInvalidas;
+    case CODIGOS_ERROR.correoNoRegistrado:
+      return MENSAJES_ERROR.correoNoRegistrado;
+    case CODIGOS_ERROR.cuentaDesactivada:
+      return MENSAJES_ERROR.cuentaDesactivada;
     case CODIGOS_ERROR.correoYaRegistrado:
       return MENSAJES_ERROR.correoYaRegistrado;
     case CODIGOS_ERROR.privacidadNoAceptada:
