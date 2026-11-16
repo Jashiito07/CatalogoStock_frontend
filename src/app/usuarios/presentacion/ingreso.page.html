@@ -69,7 +69,25 @@
         </div>
 
         @if (errorGeneral(); as mensaje) {
-          <p-message severity="error" role="alert">{{ mensaje }}</p-message>
+          <p-message id="ingreso-error" tabindex="-1" severity="error" role="alert">
+            <div class="ingreso__error">
+              <span>{{ mensaje }}</span>
+              @if (sinCuenta()) {
+                <!-- D-52: el registro recibe el correo escrito. -->
+                <button
+                  pButton
+                  id="ingreso-crear-cuenta"
+                  type="button"
+                  severity="secondary"
+                  [outlined]="true"
+                  (click)="crearCuenta()"
+                >
+                  <i class="pi pi-user-plus" aria-hidden="true"></i>
+                  Crear cuenta
+                </button>
+              }
+            </div>
+          </p-message>
         }
 
         <div class="cs-acciones">

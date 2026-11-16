@@ -3,6 +3,18 @@
   padding-inline: 0;
 }
 
+/* RNF-11: el texto de error de PrimeNG sobre el fondo del mensaje queda en 4.3:1 en modo
+   claro; se oscurece el mismo color del tema hasta superar 4.5:1. En modo oscuro se
+   conserva el del tema (5.3:1). */
+.ingreso__error span {
+  color: color-mix(in srgb, var(--p-message-error-color) 75%, black);
+}
+
+:host-context(.app-oscuro) .ingreso__error span {
+  color: inherit;
+}
+
+.ingreso__error,
 .ingreso__vendedor {
   display: flex;
   flex-direction: column;

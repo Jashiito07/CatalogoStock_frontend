@@ -8,6 +8,23 @@ describe('Mensajes de error en español (contrato de usuarios)', () => {
     expect(mensajeDeError(error, 'ingreso')).toBe('Correo o clave incorrectos.');
   });
 
+  it('D-52: 401 CORREO_NO_REGISTRADO → «No existe una cuenta registrada con ese correo.»', () => {
+    const error = new ErrorApi(401, 'CORREO_NO_REGISTRADO', 'x');
+    expect(mensajeDeError(error, 'ingreso')).toBe('No existe una cuenta registrada con ese correo.');
+  });
+
+  it('D-52: 403 CUENTA_DESACTIVADA → «Tu cuenta está desactivada. Contacta a tu vendedor.»', () => {
+    const error = new ErrorApi(403, 'CUENTA_DESACTIVADA', 'x');
+    expect(mensajeDeError(error, 'ingreso')).toBe(
+      'Tu cuenta está desactivada. Contacta a tu vendedor.',
+    );
+  });
+
+  it('D-52: CREDENCIALES_INVALIDAS conserva «Correo o clave incorrectos.» y no revela más', () => {
+    expect(MENSAJES_ERROR.credencialesInvalidas).toBe('Correo o clave incorrectos.');
+    expect(MENSAJES_ERROR.credencialesInvalidas).not.toContain('cuenta');
+  });
+
   it('PLAN 1.6: sin conexión al ingresar → «Necesitas conexión para iniciar sesión por primera vez.»', () => {
     expect(mensajeDeError(new ErrorSinConexion(), 'ingreso')).toBe(
       'Necesitas conexión para iniciar sesión por primera vez.',

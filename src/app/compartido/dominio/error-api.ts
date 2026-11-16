@@ -52,6 +52,9 @@ export class ErrorSinConexion extends Error {
 export const CODIGOS_ERROR = {
   datosInvalidos: 'DATOS_INVALIDOS',
   credencialesInvalidas: 'CREDENCIALES_INVALIDAS',
+  // usuarios-gestion.md (D-52): solo en `/ingreso/cliente`.
+  correoNoRegistrado: 'CORREO_NO_REGISTRADO',
+  cuentaDesactivada: 'CUENTA_DESACTIVADA',
   correoYaRegistrado: 'CORREO_YA_REGISTRADO',
   privacidadNoAceptada: 'PRIVACIDAD_NO_ACEPTADA',
   privacidadDesactualizada: 'PRIVACIDAD_DESACTUALIZADA',

@@ -182,6 +182,13 @@ Los archivos que cambia la configuración de red local
 - Registro (`/registro`), ingreso (`/ingreso`, solo `POST /autenticacion/ingreso/cliente`,
   D-19) e inicio del Cliente (`/inicio`). Sin sesión solo se ven bienvenida, registro e
   ingreso (PA-12).
+- Mensajes del ingreso (D-52, `docs/contrato-api/usuarios-gestion.md`): `401
+  CORREO_NO_REGISTRADO` muestra «No existe una cuenta registrada con ese correo.» con el
+  botón «Crear cuenta», que abre `/registro?correo=<correo escrito>` (el registro solo
+  rellena el campo y lo valida como siempre); `403 CUENTA_DESACTIVADA` muestra «Tu cuenta
+  está desactivada. Contacta a tu vendedor.» (solo texto: la app aún no tiene un contacto
+  del vendedor); `401 CREDENCIALES_INVALIDAS` conserva «Correo o clave incorrectos.». Se
+  muestra un solo mensaje y el foco pasa al botón o al mensaje.
 - La sesión (tokens y usuario) se guarda con `@aparajita/capacitor-secure-storage`
   (Keystore de Android, D-16). Nunca en `localStorage`, Preferences ni SQLite.
 - Sin conexión y con sesión guardada, la app abre con los datos locales aunque el token

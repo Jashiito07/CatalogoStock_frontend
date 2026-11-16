@@ -144,6 +144,70 @@ describe('IngresoPage (RF-USU-01, CA-01, D-01, D-19)', () => {
     expect(TestBed.inject(Router).url).toBe('/ingreso');
   });
 
+  it('D-52: con un correo sin cuenta muestra el mensaje y «Crear cuenta», sin otros errores', async () => {
+    ejecutar.mockRejectedValue(new ErrorApi(401, 'CORREO_NO_REGISTRADO', 'x'));
+    const elemento = await abrir();
+
+    escribir(elemento, '#ingreso-correo', 'nueva@correo.com');
+    escribir(elemento, '#ingreso-clave', 'Catalogo2026');
+    await enviar(elemento);
+
+    const alertas = elemento.querySelectorAll('p-message[severity="error"]');
+    expect(alertas.length).toBe(1);
+    expect(alertas[0].textContent).toContain('No existe una cuenta registrada con ese correo.');
+    expect(alertas[0].textContent).not.toContain('Correo o clave incorrectos.');
+    expect(alertas[0].textContent).not.toContain('desactivada');
+    const boton = elemento.querySelector<HTMLButtonElement>('#ingreso-crear-cuenta');
+    expect(boton?.textContent).toContain('Crear cuenta');
+    expect(document.activeElement).toBe(boton);
+  });
+
+  it('D-52: «Crear cuenta» lleva al registro con el correo escrito', async () => {
+    ejecutar.mockRejectedValue(new ErrorApi(401, 'CORREO_NO_REGISTRADO', 'x'));
+    const elemento = await abrir();
+    escribir(elemento, '#ingreso-correo', '  Nueva@Correo.com ');
+    escribir(elemento, '#ingreso-clave', 'Catalogo2026');
+    await enviar(elemento);
+
+    elemento.querySelector<HTMLButtonElement>('#ingreso-crear-cuenta')?.click();
+    await esperar();
+    harness.detectChanges();
+
+    const url = TestBed.inject(Router).url;
+    expect(url.startsWith('/registro?')).toBe(true);
+    expect(new URLSearchParams(url.split('?')[1]).get('correo')).toBe('nueva@correo.com');
+  });
+
+  it('D-52: con una cuenta desactivada muestra su mensaje, sin «Crear cuenta» ni contacto', async () => {
+    ejecutar.mockRejectedValue(new ErrorApi(403, 'CUENTA_DESACTIVADA', 'x'));
+    const elemento = await abrir();
+
+    escribir(elemento, '#ingreso-correo', 'maria@correo.com');
+    escribir(elemento, '#ingreso-clave', 'Catalogo2026');
+    await enviar(elemento);
+
+    const alertas = elemento.querySelectorAll('p-message[severity="error"]');
+    expect(alertas.length).toBe(1);
+    expect(alertas[0].textContent).toContain('Tu cuenta está desactivada. Contacta a tu vendedor.');
+    expect(elemento.querySelector('#ingreso-crear-cuenta')).toBeNull();
+    expect(document.activeElement).toBe(elemento.querySelector('#ingreso-error'));
+  });
+
+  it('D-52: un error posterior reemplaza al botón «Crear cuenta»', async () => {
+    ejecutar.mockRejectedValueOnce(new ErrorApi(401, 'CORREO_NO_REGISTRADO', 'x'));
+    ejecutar.mockRejectedValueOnce(new ErrorApi(401, 'CREDENCIALES_INVALIDAS', 'x'));
+    const elemento = await abrir();
+    escribir(elemento, '#ingreso-correo', 'maria@correo.com');
+    escribir(elemento, '#ingreso-clave', 'Catalogo2026');
+    await enviar(elemento);
+    expect(elemento.querySelector('#ingreso-crear-cuenta')).not.toBeNull();
+
+    await enviar(elemento);
+
+    expect(elemento.querySelector('[role="alert"]')?.textContent).toContain('Correo o clave incorrectos.');
+    expect(elemento.querySelector('#ingreso-crear-cuenta')).toBeNull();
+  });
+
   it('PLAN 1.6: sin conexión y sin sesión previa pide conexión', async () => {
     ejecutar.mockRejectedValue(new ErrorSinConexion());
     const elemento = await abrir();
@@ -171,3 +235,4 @@ describe('IngresoPage (RF-USU-01, CA-01, D-01, D-19)', () => {
     expect(clave?.type).toBe('text');
   });
 });
+
