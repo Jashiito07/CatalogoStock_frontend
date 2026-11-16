@@ -85,10 +85,18 @@ const superficies = Object.fromEntries(
 type Estado = 'blue' | 'green' | 'yellow' | 'red';
 
 /**
- * Texto de un estado (info, éxito, advertencia, error): tono 600 en claro y tono 300 en
- * oscuro. El tono 500 que trae Aura en oscuro no llega a 4.5:1 sobre el fondo (RNF-11).
+ * Texto de un estado (info, éxito, advertencia, error). En claro, tono 600 para azul y
+ * 700 para verde, amarillo y rojo (el 600 de estos queda en 2.8–4.4:1 sobre su fondo
+ * tintado); en oscuro, tono 300 (el 500 de Aura no llega a 4.5:1). RNF-11: ≥ 4.5:1.
  */
-const textoEstado = (color: Estado) => segunModo(`{${color}.600}`, `{${color}.300}`);
+const TONO_ESTADO_CLARO: Record<Estado, 600 | 700> = {
+  blue: 600,
+  green: 700,
+  yellow: 700,
+  red: 700,
+};
+const textoEstado = (color: Estado) =>
+  segunModo(`{${color}.${TONO_ESTADO_CLARO[color]}}`, `{${color}.300}`);
 
 const ESTADOS: Record<'info' | 'success' | 'warn' | 'error', Estado> = {
   info: 'blue',
