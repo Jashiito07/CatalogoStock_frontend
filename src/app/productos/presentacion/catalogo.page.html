@@ -1,0 +1,209 @@
+<ion-content>
+  <main class="cs-pagina catalogo">
+    <header class="catalogo__encabezado">
+      <a
+        pButton
+        routerLink="/inicio"
+        severity="secondary"
+        [text]="true"
+        aria-label="Volver al inicio"
+      >
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </a>
+      <app-logo variante="horizontal" class="catalogo__logo" />
+    </header>
+    <h1 class="cs-titulo">Catálogo</h1>
+
+    <section class="catalogo__filtros" aria-label="Buscar y filtrar">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          id="catalogo-busqueda"
+          type="search"
+          inputmode="search"
+          enterkeyhint="search"
+          autocomplete="off"
+          placeholder="Buscar productos…"
+          aria-label="Buscar productos por nombre"
+          [fluid]="true"
+          [attr.maxlength]="largoMaximoBusqueda"
+          [ngModel]="textoBusqueda()"
+          (ngModelChange)="escribirBusqueda($event)"
+        />
+      </p-iconfield>
+
+      @if (marcas().length > 0) {
+        <div class="catalogo__chips" role="group" aria-label="Filtrar por marca">
+          <button
+            pButton
+            type="button"
+            size="small"
+            class="chip"
+            [class.chip--activo]="marcaId() === null"
+            [outlined]="marcaId() !== null"
+            [attr.aria-pressed]="marcaId() === null"
+            (click)="elegirMarca(null)"
+          >
+            Todas
+          </button>
+          @for (marca of marcas(); track marca.id) {
+            <button
+              pButton
+              type="button"
+              size="small"
+              class="chip chip--marca"
+              [class.chip--activo]="marcaId() === marca.id"
+              [outlined]="marcaId() !== marca.id"
+              [style.--marca-fondo]="marca.color"
+              [style.--marca-texto]="
+                marcaId() === marca.id ? cabecera()?.texto : null
+              "
+              [style.--marca-acento]="marca.colorAcento"
+              [attr.aria-pressed]="marcaId() === marca.id"
+              (click)="elegirMarca(marca.id)"
+            >
+              <span class="chip__punto" aria-hidden="true"></span>
+              {{ marca.nombre }}
+            </button>
+          }
+        </div>
+      }
+
+      <p-select
+        inputId="catalogo-disponibilidad"
+        class="catalogo__disponibilidad"
+        [options]="opcionesDisponibilidad"
+        optionLabel="etiqueta"
+        optionValue="valor"
+        placeholder="Toda la disponibilidad"
+        ariaLabel="Filtrar por disponibilidad"
+        [showClear]="true"
+        [fluid]="true"
+        [ngModel]="disponibilidad()"
+        (ngModelChange)="elegirDisponibilidad($event)"
+      />
+    </section>
+
+    @if (cabecera(); as marca) {
+      <!-- RF-CAT-05 / D-43: cabecera de la marca con su color y su acento. -->
+      <section
+        class="marca-cabecera"
+        [class.marca-cabecera--acento]="marca.acento !== null"
+        [style.--marca-fondo]="marca.color"
+        [style.--marca-texto]="marca.texto"
+        [style.--marca-acento]="marca.acento"
+        [style.--marca-texto-acento]="marca.textoAcento"
+      >
+        <h2 class="marca-cabecera__nombre">{{ marca.nombre }}</h2>
+        @if (estado() === 'listo') {
+          <span class="marca-cabecera__total">{{ resumen() }}</span>
+        }
+      </section>
+    }
+
+    @switch (estado()) {
+      @case ('cargando') {
+        <div class="catalogo__lista" role="status" aria-label="Cargando productos">
+          @for (n of esqueletos; track n) {
+            <div class="esqueleto">
+              <p-skeleton width="4.875rem" height="4.875rem" borderRadius="0.75rem" />
+              <div class="esqueleto__texto">
+                <p-skeleton width="80%" height="1rem" />
+                <p-skeleton width="35%" height="0.875rem" />
+                <p-skeleton width="55%" height="1.25rem" />
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @case ('sinConexion') {
+        <!-- RNF-06: el catálogo descargado llega en la Fase 4; por ahora se pide conexión. -->
+        <p-message severity="warn" icon="pi pi-wifi" role="status">
+          {{ mensajeSinConexion }}
+        </p-message>
+        <button pButton type="button" id="catalogo-reintentar" (click)="reintentar()">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          Reintentar
+        </button>
+      }
+      @case ('error') {
+        <p-message severity="error" icon="pi pi-exclamation-triangle" role="alert">
+          No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.
+        </p-message>
+        <button pButton type="button" id="catalogo-reintentar" (click)="reintentar()">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          Reintentar
+        </button>
+      }
+      @case ('listo') {
+        @if (!enLinea() && productos().length > 0) {
+          <!-- RN-07: sin conexión se conservan los productos ya cargados, no definitivos. -->
+          <p-message severity="warn" icon="pi pi-wifi" role="status">
+            Sin conexión: estás viendo los productos ya cargados (no definitivos).
+          </p-message>
+        }
+
+        @if (productos().length === 0) {
+          <section class="catalogo__vacio" role="status">
+            @if (conFiltros()) {
+              <i class="pi pi-search" aria-hidden="true"></i>
+              <h2>No hay productos que coincidan</h2>
+              <p class="cs-ayuda">Prueba con otra búsqueda u otra marca.</p>
+              <button pButton type="button" id="catalogo-limpiar" (click)="limpiarFiltros()">
+                <i class="pi pi-filter-slash" aria-hidden="true"></i>
+                Limpiar filtros
+              </button>
+            } @else {
+              <i class="pi pi-box" aria-hidden="true"></i>
+              <h2>Aún no hay productos</h2>
+              <p class="cs-ayuda">Cuando el vendedor publique productos, los verás aquí.</p>
+            }
+          </section>
+        } @else {
+          @if (!cabecera()) {
+            <p class="catalogo__resumen cs-ayuda" role="status">{{ resumen() }}</p>
+          }
+          <ul class="catalogo__lista" aria-label="Productos">
+            @for (producto of productos(); track producto.id) {
+              <li><app-fila-producto [producto]="producto" /></li>
+            }
+          </ul>
+
+          @if (cargandoMas()) {
+            <div class="catalogo__lista" role="status" aria-label="Cargando más productos">
+              <div class="esqueleto">
+                <p-skeleton width="4.875rem" height="4.875rem" borderRadius="0.75rem" />
+                <div class="esqueleto__texto">
+                  <p-skeleton width="80%" height="1rem" />
+                  <p-skeleton width="55%" height="1.25rem" />
+                </div>
+              </div>
+            </div>
+          } @else if (errorAlCargarMas()) {
+            <p-message severity="error" icon="pi pi-exclamation-triangle" role="alert">
+              No pudimos cargar más productos.
+            </p-message>
+            <button pButton type="button" id="catalogo-reintentar-mas" (click)="cargarMas()">
+              <i class="pi pi-refresh" aria-hidden="true"></i>
+              Reintentar
+            </button>
+          } @else if (hayMas()) {
+            <div #centinela class="catalogo__centinela">
+              <button
+                pButton
+                type="button"
+                id="catalogo-ver-mas"
+                severity="secondary"
+                [outlined]="true"
+                (click)="cargarMas()"
+              >
+                Ver más productos
+              </button>
+            </div>
+          }
+        }
+      }
+    }
+  </main>
+</ion-content>

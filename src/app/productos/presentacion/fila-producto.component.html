@@ -1,0 +1,23 @@
+<article class="fila">
+  <p-avatar
+    class="fila__miniatura"
+    shape="square"
+    [icon]="urlMiniatura() === null ? 'pi pi-image' : undefined"
+    [image]="urlMiniatura() ?? undefined"
+    [attr.aria-hidden]="true"
+    (onImageError)="alFallarImagen()"
+  />
+  <div class="fila__info">
+    <h3 class="fila__nombre">{{ producto().nombre }}</h3>
+    <span
+      class="fila__marca"
+      [style.--marca-fondo]="producto().marca.color"
+      [style.--marca-texto]="textoMarca()"
+      >{{ producto().marca.nombre }}</span
+    >
+    <div class="fila__pie">
+      <span class="fila__precio">{{ precio() }}</span>
+      <p-tag [class]="claseDisponibilidad()" [icon]="icono()" [value]="etiqueta()" />
+    </div>
+  </div>
+</article>

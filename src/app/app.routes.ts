@@ -53,5 +53,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./inicio/presentacion/inicio-cliente.page').then((m) => m.InicioClientePage),
   },
+  {
+    // RF-CAT-03 / RF-CAT-05: lista de productos en línea (subfase 2.7; sin conexión en F4).
+    path: 'catalogo',
+    title: 'Catálogo · CatálogoStock',
+    canActivate: [conSesionGuard],
+    loadComponent: () =>
+      import('./productos/presentacion/catalogo.page').then((m) => m.CatalogoPage),
+  },
   { path: '**', redirectTo: 'inicio' },
 ];

@@ -63,11 +63,17 @@
       </div>
     </p-card>
 
-    <p-card header="Catálogo" subheader="Muy pronto">
+    <p-card header="Catálogo">
       <p class="inicio__texto">
-        Aquí podrás explorar los productos de Yanbal, Avon, L'Bel y otras marcas, incluso sin
-        conexión.
+        Explora los productos de Yanbal, Avon, L'Bel y otras marcas.
       </p>
+      <ng-template #footer>
+        <!-- RF-CAT-03: por ahora el catálogo se ve en línea; sin conexión llega en la Fase 4. -->
+        <a pButton routerLink="/catalogo" [fluid]="true">
+          <i class="pi pi-book" aria-hidden="true"></i>
+          Ver catálogo
+        </a>
+      </ng-template>
     </p-card>
   </main>
 </ion-content>
