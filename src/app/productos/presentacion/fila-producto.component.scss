@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.fila {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  min-height: 5.5rem;
+  padding: 0.5rem;
+  background: var(--cs-superficie);
+  border: 1px solid var(--cs-borde);
+  border-radius: 0.875rem;
+}
+
+.fila__miniatura {
+  flex: none;
+  --p-avatar-width: 4.875rem;
+  --p-avatar-height: 4.875rem;
+  --p-avatar-border-radius: 0.75rem;
+  width: 4.875rem;
+  height: 4.875rem;
+}
+
+/* La foto llena la miniatura, recortada con las esquinas redondeadas del diseño B. */
+:host ::ng-deep .fila__miniatura {
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+:host ::ng-deep .fila__miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fila__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fila__nombre {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--cs-texto);
+  overflow-wrap: anywhere;
+}
+
+/* RF-CAT-05: la etiqueta de marca usa su color y el texto calculado por el servidor. */
+.fila__marca {
+  align-self: flex-start;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--marca-fondo, var(--cs-primario));
+  color: var(--marca-texto, var(--cs-sobre-primario));
+  /* Un fondo casi negro (L'Bel) se perdería sobre la superficie oscura: borde visible. */
+  box-shadow: 0 0 0 1px var(--cs-borde-marca);
+}
+
+.fila__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.fila__precio {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cs-primario);
+}
+
+/* Disponibilidad (RN-09): texto, ícono y color; los tres estados se ven, ninguno se oculta. */
+:host ::ng-deep .fila__estado {
+  font-weight: 600;
+}
+
+:host ::ng-deep .fila__estado--disponible {
+  background: var(--cs-disponible-fondo);
+  color: var(--cs-disponible-texto);
+}
+
+/* Acento con el texto corporativo #1E293B, nunca blanco (RNF-11). */
+:host ::ng-deep .fila__estado--agotado {
+  background: var(--cs-acento);
+  color: var(--cs-sobre-acento);
+}
+
+:host ::ng-deep .fila__estado--pendiente_reposicion {
+  background: var(--cs-pendiente-fondo);
+  color: var(--cs-pendiente-texto);
+}

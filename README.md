@@ -229,6 +229,22 @@ funcionando sin ella).
 - Para probar sin enviar correos reales, intercepta la red del navegador (CDP/DevTools) o
   usa un servidor simulado: la API real limita a 3 envíos por hora y por cuenta.
 
+## Catálogo en línea (subfase 2.7: RF-CAT-03, RF-CAT-05, D-42, D-43)
+
+Ruta `/catalogo` (botón «Ver catálogo» en Inicio). Lista compacta (diseño B) del módulo
+`src/app/productos/`: miniatura, nombre, marca con su color, precio en texto (`$12.50`) y
+disponibilidad. Los agotados y pendientes de reposición se muestran (RN-09).
+
+- Consume `GET /marcas` y `GET /productos` (`docs/contrato-api/productos.md`) con paginación
+  (se pide más al llegar al final o con «Ver más productos»), búsqueda con retardo de 350 ms y
+  filtros por marca y disponibilidad.
+- Los colores de marca y el texto legible (`textoSobreColor`, `textoSobreAcento`) vienen del
+  servidor; la app solo recalcula como respaldo si no cumplen 4.5:1.
+- Es **en línea**: sin conexión muestra «Necesitas conexión para ver el catálogo…». El catálogo
+  en SQLite y sin conexión llega en la Fase 4. Solo se guarda en memoria la lista de marcas de la
+  sesión.
+- Sin datos reales: se prueba con pruebas unitarias o interceptando la red del navegador.
+
 ## Tema automático claro / oscuro (N2)
 
 - **Horario** (hora local del dispositivo, no la del servidor): de **18:40 a 06:45** la app

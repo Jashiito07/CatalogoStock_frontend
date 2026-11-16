@@ -18,6 +18,14 @@
   --cs-borde: #e2e8f0;
   --cs-texto-secundario: #475569;
 
+  /* Disponibilidad de los productos (RN-09). Agotado usa el Acento con --cs-sobre-acento. */
+  --cs-disponible-fondo: #dcfce7;
+  --cs-disponible-texto: #14532d;
+  --cs-pendiente-fondo: #ede9fe;
+  --cs-pendiente-texto: #4c1d95;
+  /* Borde de las etiquetas con el color de una marca: solo hace falta en modo oscuro. */
+  --cs-borde-marca: transparent;
+
   /* Tamaño mínimo de los controles táctiles (RNF-10: 48 dp en Android). */
   --cs-control-minimo: 48px;
 
@@ -50,6 +58,11 @@ body {
   --cs-borde: #334155;
   --cs-texto-secundario: #cbd5e1;
   --cs-sobre-primario: #ffffff;
+  --cs-disponible-fondo: #14532d;
+  --cs-disponible-texto: #dcfce7;
+  --cs-pendiente-fondo: #4c1d95;
+  --cs-pendiente-texto: #ede9fe;
+  --cs-borde-marca: #64748b;
 
   color-scheme: dark;
 }

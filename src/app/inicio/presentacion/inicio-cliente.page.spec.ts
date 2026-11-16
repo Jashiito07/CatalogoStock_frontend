@@ -98,6 +98,15 @@ describe('InicioClientePage (PLAN 1.6, D-10)', () => {
     expect(logo?.alt).toBe('CatálogoStock');
   });
 
+  it('RF-CAT-03: ofrece «Ver catálogo», que lleva a la lista de productos', async () => {
+    const { elemento } = await abrir();
+
+    const enlace = Array.from(elemento.querySelectorAll('a')).find((a) =>
+      a.textContent?.includes('Ver catálogo'),
+    );
+    expect(enlace?.getAttribute('href')).toBe('/catalogo');
+  });
+
   it('N2: ofrece el selector Tema (Automático / Claro / Oscuro) y aplica la opción elegida', async () => {
     const { fixture, elemento } = await abrir();
     const tema = TestBed.inject(ServicioTema);

@@ -18,6 +18,7 @@ import { routes } from './app.routes';
 import { proveerCompartido } from './compartido/compartido.providers';
 import { CLASE_TEMA_OSCURO, ServicioTema } from './compartido/presentacion/tema/servicio-tema';
 import { TemaCatalogoStock } from './compartido/presentacion/tema/tema-catalogostock';
+import { proveerProductos } from './productos/productos.providers';
 import { interceptorAutenticacion } from './usuarios/infraestructura/interceptor-autenticacion';
 import { proveerUsuarios } from './usuarios/usuarios.providers';
 
@@ -47,5 +48,6 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'es-EC' },
     proveerCompartido(),
     proveerUsuarios(),
+    proveerProductos(),
   ],
 };
