@@ -70,6 +70,15 @@ describe('IngresoPage (RF-USU-01, CA-01, D-01, D-19)', () => {
     expect(enlace?.rel).toBe('noopener');
   });
 
+  it('demostración (D-37): con `urlPanel` vacío no se muestra el botón ni la nota del panel', async () => {
+    TestBed.overrideProvider(URL_PANEL, { useValue: '' });
+    const elemento = await abrir();
+
+    expect(elemento.querySelector('#ingreso-panel')).toBeNull();
+    expect(elemento.textContent).not.toContain('Ir al panel del vendedor');
+    expect(elemento.textContent).not.toContain('Administra tu negocio desde el panel web');
+  });
+
   it('RF-USU-05: enlaza «¿Olvidaste tu clave?» con Recuperar clave', async () => {
     const elemento = await abrir();
 

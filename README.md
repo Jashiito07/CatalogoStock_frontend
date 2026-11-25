@@ -282,6 +282,41 @@ disponibilidad. Los agotados y pendientes de reposición se muestran (RN-09).
   enlaces en `#C4B5FD`; el Acento `#F97316` conserva siempre texto `#1E293B`. Los contrastes
   (RNF-11 ≥ 4.5:1) se comprueban en `presentacion/tema/contraste.spec.ts`.
 
+## Demostración por internet (túnel)
+
+Para mostrar la app a un tercero con **un solo enlace HTTPS** que sirve la app y la API
+(Cloudflare Tunnel). No afecta al APK ni a `cap sync`: usa su propia carpeta de salida
+(`dist/catalogostock-demo`) y `environment.demo.ts` (`apiUrl: '/api/v1'` relativa,
+`urlPanel: ''`).
+
+```bash
+# 1. Backend de demostración escuchando en 127.0.0.1:3100 (ver README del backend)
+# 2. App y proxy
+npm run build:demo
+npm run demo                       # http://127.0.0.1:4300 (PUERTO, BACKEND_URL opcionales)
+# 3. Túnel (en otra terminal)
+cloudflared tunnel --url http://127.0.0.1:4300
+```
+
+Variables de `npm run demo`: `PUERTO` (4300), `BACKEND_URL` (`http://127.0.0.1:3100`) y
+`RAIZ` (carpeta del build). El servidor escucha solo en `127.0.0.1`, reenvía `/api/` al
+backend (con `X-Forwarded-For`/`X-Forwarded-Proto`, y 502 si el backend no responde) y solo
+registra método, ruta sin parámetros y estado. Sus pruebas: `npm run test:scripts`.
+
+Advertencias:
+
+- **Base de datos aparte**: usa una base de datos de demostración, nunca la de desarrollo
+  ni la real (los visitantes pueden registrarse y crear pedidos).
+- **El panel del Vendedor no se expone**: el botón «Ir al panel del vendedor» se oculta
+  (`urlPanel` vacío). El Vendedor opera desde su PC en local.
+- **Correos reales**: si el backend tiene SMTP configurado, los registros y la recuperación
+  de clave envían correos de verdad. Usa un SMTP de pruebas o avisa a los visitantes.
+- **Límite de intentos por IP**: el proxy hace que el backend vea una sola IP
+  (`127.0.0.1`), así que el límite de intentos de ingreso agrupa a **todos** los
+  visitantes: unos pocos intentos fallidos pueden bloquear a los demás por un rato.
+- Es solo para demostrar: el enlace del túnel es público mientras esté activo; ciérralo al
+  terminar.
+
 ## Estructura
 
 ```text

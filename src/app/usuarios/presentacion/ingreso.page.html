@@ -102,24 +102,27 @@
       </form>
     </p-card>
 
-    <!-- D-01 / D-37: el Vendedor administra desde el panel web, que se abre en el navegador
-         del dispositivo (en Capacitor, las URL externas salen de la app). -->
-    <p-message severity="info" icon="pi pi-briefcase">
-      <div class="ingreso__vendedor">
-        <span>¿Eres el vendedor? Administra tu negocio desde el panel web.</span>
-        <a
-          pButton
-          id="ingreso-panel"
-          severity="secondary"
-          [outlined]="true"
-          [href]="urlPanel"
-          target="_blank"
-          rel="noopener"
-        >
-          <i class="pi pi-external-link" aria-hidden="true"></i>
-          Ir al panel del vendedor
-        </a>
-      </div>
-    </p-message>
+    @if (urlPanel) {
+      <!-- D-01 / D-37: el Vendedor administra desde el panel web, que se abre en el navegador
+           del dispositivo (en Capacitor, las URL externas salen de la app). Con `urlPanel` vacío
+           (demostración por internet) no se muestra. -->
+      <p-message severity="info" icon="pi pi-briefcase">
+        <div class="ingreso__vendedor">
+          <span>¿Eres el vendedor? Administra tu negocio desde el panel web.</span>
+          <a
+            pButton
+            id="ingreso-panel"
+            severity="secondary"
+            [outlined]="true"
+            [href]="urlPanel"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="pi pi-external-link" aria-hidden="true"></i>
+            Ir al panel del vendedor
+          </a>
+        </div>
+      </p-message>
+    }
   </main>
 </ion-content>

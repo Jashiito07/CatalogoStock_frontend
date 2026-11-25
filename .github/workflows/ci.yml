@@ -29,6 +29,12 @@ jobs:
         run: npm run lint
       - name: Pruebas
         run: npm test -- --watch=false
+      - name: Pruebas del servidor de demostración
+        run: npm run test:scripts
+
+      - name: Build de demostración
+        run: npm run build:demo
+
       - name: Build
         run: npm run build
 
