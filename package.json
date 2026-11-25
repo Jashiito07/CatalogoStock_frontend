@@ -11,7 +11,10 @@
     "android:red-local": "npm run build:red-local && node scripts/cap-red-local.mjs run android",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "build:demo": "ng build --configuration demo",
+    "demo": "node scripts/servidor-demo.mjs",
+    "test:scripts": "vitest run scripts"
   },
   "prettier": {
     "printWidth": 100,

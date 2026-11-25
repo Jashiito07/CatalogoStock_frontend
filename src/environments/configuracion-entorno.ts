@@ -19,4 +19,9 @@ export interface ConfiguracionEntorno {
    * `apiEnMismoHost` está activo, el host se ajusta igual que el de la API.
    */
   readonly urlPanel: string;
+  /*
+   * Demostración por internet (`environment.demo.ts`): `apiUrl` puede ser relativa
+   * (`/api/v1`) y se resuelve contra el origen de la página; `urlPanel` vacío oculta el
+   * botón del panel del Vendedor.
+   */
 }
