@@ -1,4 +1,4 @@
-import { COLORES_CORPORATIVOS, TemaCatalogoStock } from './tema-catalogostock';
+import { COLORES_CORPORATIVOS, COLORES_OSCURO, TemaCatalogoStock } from './tema-catalogostock';
 
 interface TokensColor {
   background?: string;
@@ -16,11 +16,20 @@ function token(ruta: string): unknown {
 }
 
 describe('TemaCatalogoStock (D-06, N2)', () => {
-  it('genera la escala primaria desde el Primario en claro y desde el Secundario en oscuro', () => {
+  it('genera la escala primaria desde el Primario en claro y en oscuro', () => {
     const valor = String(token('semantic.primary.500')).toLowerCase();
-    expect(valor).toBe(
-      `light-dark(${COLORES_CORPORATIVOS.primario.toLowerCase()}, ${COLORES_CORPORATIVOS.secundario.toLowerCase()})`,
-    );
+    expect(valor).toBe(COLORES_CORPORATIVOS.primario.toLowerCase());
+  });
+
+  it('el primario como texto pasa a azul claro en oscuro (D-41)', () => {
+    const color = String(token('semantic.primary.color')).toLowerCase();
+    expect(color).toContain(COLORES_OSCURO.azulClaro.toLowerCase());
+  });
+
+  it('esquinas muy redondeadas: botones y etiquetas en píldora, tarjetas de 26 px', () => {
+    expect(token('components.button.root.borderRadius')).toBe('999px');
+    expect(token('components.tag.root.borderRadius')).toBe('999px');
+    expect(token('primitive.borderRadius.xl')).toBe('26px');
   });
 
   it('el botón principal usa texto blanco sobre el tono 500 de la escala primaria', () => {
@@ -29,12 +38,12 @@ describe('TemaCatalogoStock (D-06, N2)', () => {
     expect(principal.color).toBe(COLORES_CORPORATIVOS.sobreColor);
   });
 
-  it('usa el Secundario corporativo en los botones secundarios (claro), con texto blanco', () => {
+  it('usa el Secundario corporativo en los botones secundarios, con texto blanco', () => {
     const secundario = token('components.button.root.secondary') as TokensColor;
-    expect(secundario.background?.toLowerCase()).toContain(
-      `light-dark(${COLORES_CORPORATIVOS.secundario.toLowerCase()},`,
+    expect(secundario.background?.toLowerCase()).toBe(
+      COLORES_CORPORATIVOS.secundario.toLowerCase(),
     );
-    expect(secundario.color).toContain(`light-dark(${COLORES_CORPORATIVOS.sobreColor},`);
+    expect(secundario.color).toBe(COLORES_CORPORATIVOS.sobreColor);
   });
 
   it('RNF-11: sobre el Acento el texto va en el color Texto, nunca en blanco (claro y oscuro)', () => {

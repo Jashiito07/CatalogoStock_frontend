@@ -43,6 +43,7 @@
               "node_modules/@ionic/angular/css/structure.css",
               "node_modules/primeicons/primeicons.css",
               "src/app/compartido/presentacion/tema/colores.css",
+              "src/app/compartido/presentacion/tema/utilidades.css",
               "src/styles.scss"
             ],
             "polyfills": [

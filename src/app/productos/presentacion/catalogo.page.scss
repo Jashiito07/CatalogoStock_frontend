@@ -37,8 +37,14 @@
 .chip {
   flex: none;
   white-space: nowrap;
-  border-radius: 99px;
+  border-radius: var(--cs-radio-pildora);
   min-height: var(--cs-control-minimo);
+  transition: transform var(--cs-duracion-corta) var(--cs-curva);
+}
+
+/* Chip activo: sube un poco (microinteracción; se apaga con «reducir movimiento»). */
+.chip.chip--activo {
+  transform: translateY(-2px);
 }
 
 .chip__punto {
@@ -73,8 +79,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1rem;
-  border-radius: 0.875rem;
+  padding: var(--cs-espacio-4) var(--cs-espacio-5);
+  border-radius: var(--cs-radio-tarjeta);
   background: var(--marca-fondo);
   color: var(--marca-texto);
   box-shadow: 0 0 0 1px var(--cs-borde-marca);
@@ -86,13 +92,12 @@
 
 .marca-cabecera__nombre {
   margin: 0;
-  font-size: 1.375rem;
-  font-weight: 800;
+  font-size: var(--cs-texto-xl);
 }
 
 .marca-cabecera__total {
   padding: 0.125rem 0.625rem;
-  border-radius: 99px;
+  border-radius: var(--cs-radio-pildora);
   font-size: 0.8125rem;
   font-weight: 700;
   background: var(--marca-acento, transparent);
@@ -117,9 +122,9 @@
   display: flex;
   gap: 0.75rem;
   padding: 0.5rem;
-  background: var(--cs-superficie);
+  background: var(--cs-sup);
   border: 1px solid var(--cs-borde);
-  border-radius: 0.875rem;
+  border-radius: var(--cs-radio-tarjeta);
 }
 
 .esqueleto__texto {
