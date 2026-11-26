@@ -33,9 +33,14 @@ jobs:
         run: npm run test:scripts
 
       - name: Build de demostración
+        # D-59: sin el secreto (forks, PR de terceros) la variable queda vacía y el build sigue.
+        env:
+          PRIMEUI_LICENSE: ${{ secrets.PRIMEUI_LICENSE }}
         run: npm run build:demo
 
       - name: Build
+        env:
+          PRIMEUI_LICENSE: ${{ secrets.PRIMEUI_LICENSE }}
         run: npm run build
 
   apk:
@@ -58,6 +63,8 @@ jobs:
         run: npm ci
       # Configuración segura (sin red local ni HTTP sin cifrar, RNF-01).
       - name: Build y sincronización con Android
+        env:
+          PRIMEUI_LICENSE: ${{ secrets.PRIMEUI_LICENSE }}
         run: |
           npm run build
           npx cap sync android

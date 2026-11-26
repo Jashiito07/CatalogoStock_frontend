@@ -80,6 +80,38 @@ Después de cambiar plugins o la configuración nativa: `npm run build` y luego
   `ic_launcher_foreground` del ícono adaptativo, con fondo blanco) y la pantalla de
   arranque (`drawable*/splash.png`) se generaron a partir de ese paquete.
 
+## Licencia de PrimeNG (PrimeUI Community)
+
+PrimeNG 22 pide una clave de licencia gratuita (PrimeUI Community, D-59). Sin ella la app
+funciona, pero muestra el aviso rojo «Invalid PrimeUI License». La verificación es sin
+conexión. **La clave no se publica nunca**: los repositorios son públicos y los términos de
+PrimeUI lo prohíben. Por eso no está en Git.
+
+Cómo funciona: `src/environments/licencia-primeng.ts` (versionado) exporta `''`. Las
+configuraciones `development`, `production`, `demo` y `red-local` de `angular.json` lo
+sustituyen por `src/environments/licencia-primeng.local.ts`, que **está en `.gitignore`** y
+genera `scripts/preparar-licencia.mjs` antes de `start`, `build`, `build:demo`,
+`build:red-local`, `watch`, `cap:red-local` y `android:red-local` (ganchos `pre*` de npm).
+Si ejecutas `ng` directamente, corre antes `npm run preparar-licencia`.
+
+La clave se toma, por prioridad, de:
+
+1. la variable de entorno `PRIMEUI_LICENSE`;
+2. el archivo `%USERPROFILE%\catalogostock-claves\primeui.txt` (solo la clave, sin espacios);
+3. vacío (la app compila igual, con el aviso).
+
+Pasos:
+
+1. Regístrate en <https://primeui.dev> y obtén la licencia Community.
+2. Guarda la clave en `%USERPROFILE%\catalogostock-claves\primeui.txt` (fuera del
+   repositorio). El script informa solo «clave aplicada» o «sin clave»; nunca la imprime, y
+   no sobrescribe un archivo local con clave por uno vacío.
+3. CI: crea el secreto `PRIMEUI_LICENSE` en GitHub (Settings → Secrets and variables →
+   Actions). Sin el secreto (forks, PR de terceros) el build sigue funcionando, con el aviso.
+4. La licencia se **renueva cada año**: actualiza el archivo y el secreto.
+
+> No pegues la clave en issues, PR, capturas, registros ni archivos versionados.
+
 ## Probar en el celular (red local, solo desarrollo)
 
 Requisitos comunes:

@@ -14,8 +14,10 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 
+import { LICENCIA_PRIMENG } from '../environments/licencia-primeng';
 import { routes } from './app.routes';
 import { proveerCompartido } from './compartido/compartido.providers';
+import { opcionesLicencia } from './compartido/presentacion/tema/licencia-primeng';
 import { CLASE_TEMA_OSCURO, ServicioTema } from './compartido/presentacion/tema/servicio-tema';
 import { TemaCatalogoStock } from './compartido/presentacion/tema/tema-catalogostock';
 import { proveerProductos } from './productos/productos.providers';
@@ -35,6 +37,8 @@ export const appConfig: ApplicationConfig = {
     // Token de acceso y renovación con rotación ante TOKEN_VENCIDO (D-09).
     provideHttpClient(withInterceptors([interceptorAutenticacion])),
     providePrimeNG({
+      // Licencia PrimeUI Community (D-59): la clave no se versiona (ver README).
+      ...opcionesLicencia(LICENCIA_PRIMENG),
       theme: {
         preset: TemaCatalogoStock,
         // Modo oscuro (N2): lo activa la clase `app-oscuro` en <html> (ServicioTema).

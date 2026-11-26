@@ -56,6 +56,9 @@ Thumbs.db
 # Configuración local de red (IP de la PC para el APK de desarrollo; ver README)
 src/environments/environment.red-local.ts
 
+# Clave de la licencia de PrimeNG (D-59): nunca en Git; la genera scripts/preparar-licencia.mjs
+src/environments/licencia-primeng.local.ts
+
 # Android (Capacitor)
 android/app/build
 android/build
