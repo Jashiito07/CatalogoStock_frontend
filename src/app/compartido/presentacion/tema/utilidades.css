@@ -1,0 +1,395 @@
+/*
+ * Clases utilitarias compartidas del rediseño (etapa 1). Las pantallas y componentes de las
+ * etapas siguientes las reutilizan en vez de repetir estilos. Solo usan variables --cs-*
+ * (colores.css): sin hexadecimales, sin `backdrop-filter` y con animaciones ligeras de CSS.
+ *
+ * Índice: tipografía · tarjeta · chip · etiqueta de estado · marca · hoja inferior ·
+ *         movimiento · reducir movimiento.
+ */
+
+/* ---------- Tipografía: serifa solo para títulos y nombres de marca ---------- */
+
+.cs-titulo,
+.cs-titulo-serif,
+.cs-nombre-marca {
+  font-family: var(--cs-fuente-titulo);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.cs-titulo,
+.cs-titulo-serif {
+  margin: 0;
+  font-size: var(--cs-texto-2xl);
+  color: var(--cs-texto);
+}
+
+.cs-subtitulo {
+  margin: 0;
+  font-family: var(--cs-fuente-titulo);
+  font-size: var(--cs-texto-xl);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--cs-texto);
+}
+
+/* Etiqueta pequeña sobre un título (acento oscuro legible, RNF-11). */
+.cs-kicker {
+  margin: 0;
+  font-size: var(--cs-texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cs-kick);
+}
+
+.cs-texto-secundario {
+  color: var(--cs-texto2);
+}
+
+.cs-enlace {
+  color: var(--cs-pri-t);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Precio u otra cifra destacada. */
+.cs-cifra {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-pri-t);
+}
+
+/* ---------- Tarjeta ---------- */
+
+.cs-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-3);
+  padding: var(--cs-espacio-4);
+  background: var(--cs-sup);
+  color: var(--cs-texto);
+  border: 1px solid var(--cs-borde);
+  border-radius: var(--cs-radio-tarjeta);
+  box-shadow: var(--cs-sombra);
+  overflow: hidden;
+}
+
+.cs-tarjeta--plana {
+  box-shadow: none;
+}
+
+/* Tarjeta que se puede tocar: se eleva al pasar el cursor y se encoge al pulsar. */
+.cs-tarjeta--pulsable {
+  cursor: pointer;
+  transition:
+    transform var(--cs-duracion) var(--cs-curva),
+    box-shadow var(--cs-duracion) var(--cs-curva);
+}
+
+.cs-tarjeta--pulsable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cs-sombra-alta);
+}
+
+.cs-tarjeta--pulsable:active {
+  transform: scale(0.98);
+}
+
+/* Imagen de producto: 4:5, recortada con las esquinas de la tarjeta. */
+.cs-imagen-producto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: calc(var(--cs-radio-tarjeta) - var(--cs-espacio-2));
+  background: var(--cs-sup2);
+}
+
+/* ---------- Chip de filtro ---------- */
+
+.cs-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cs-espacio-2);
+  min-height: var(--cs-tactil-minimo);
+  padding: 0 var(--cs-espacio-4);
+  font: inherit;
+  font-size: var(--cs-texto-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--cs-texto);
+  background: var(--cs-sup);
+  border: 1px solid var(--cs-ctl);
+  border-radius: var(--cs-radio-pildora);
+  cursor: pointer;
+  transition:
+    transform var(--cs-duracion-corta) var(--cs-curva),
+    background-color var(--cs-duracion-corta) var(--cs-curva);
+}
+
+.cs-chip:active {
+  transform: scale(0.96);
+}
+
+/* Chip activo: el estado se anuncia con aria-pressed y además cambia de forma (sube). */
+.cs-chip--activo,
+.cs-chip[aria-pressed='true'] {
+  color: var(--cs-sobre-pri);
+  background: var(--cs-pri);
+  border-color: var(--cs-pri);
+  transform: translateY(-2px);
+}
+
+.cs-chip:focus-visible,
+.cs-tarjeta--pulsable:focus-visible {
+  outline: 3px solid var(--cs-pri-t);
+  outline-offset: 2px;
+}
+
+/* ---------- Etiqueta de estado: SIEMPRE con texto e ícono (no solo color) ---------- */
+
+.cs-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-espacio-1);
+  padding: var(--cs-espacio-1) var(--cs-espacio-3);
+  font-size: var(--cs-texto-xs);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--cs-info);
+  background: var(--cs-info-bg);
+  border-radius: var(--cs-radio-pildora);
+}
+
+.cs-etiqueta > .pi {
+  font-size: 0.875em;
+}
+
+.cs-etiqueta--ok {
+  color: var(--cs-ok);
+  background: var(--cs-ok-bg);
+}
+
+.cs-etiqueta--warn {
+  color: var(--cs-warn);
+  background: var(--cs-warn-bg);
+}
+
+.cs-etiqueta--mal {
+  color: var(--cs-mal);
+  background: var(--cs-mal-bg);
+}
+
+.cs-etiqueta--info {
+  color: var(--cs-info);
+  background: var(--cs-info-bg);
+}
+
+/* Insignia destacada (contador, rebaja): Acento con texto #1E293B, nunca blanco. */
+.cs-etiqueta--acento {
+  color: var(--cs-sobre-acento);
+  background: var(--cs-acento);
+}
+
+/* ---------- Marca: color de la API (--marca-*) o de una marca conocida ---------- */
+
+/* Etiqueta con el color de la marca; el texto lo calcula el servidor por contraste. */
+.cs-marca-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.0625rem var(--cs-espacio-2);
+  font-size: var(--cs-texto-xs);
+  font-weight: 600;
+  color: var(--marca-texto, var(--cs-sobre-pri));
+  background: var(--marca-fondo, var(--cs-pri));
+  border-radius: var(--cs-radio-pildora);
+  /* Un fondo casi negro (L'Bel, Leonisa) se perdería sobre la superficie oscura. */
+  box-shadow: 0 0 0 1px var(--cs-borde-marca);
+}
+
+/* Banda de marca a todo el ancho: su fondo y, si tiene, una franja con su acento. */
+.cs-banda-marca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-espacio-3);
+  padding: var(--cs-espacio-4) var(--cs-espacio-5);
+  color: var(--marca-texto, var(--cs-sobre-pri));
+  background: var(--marca-fondo, var(--cs-pri));
+  border-radius: var(--cs-radio-tarjeta);
+  box-shadow: 0 0 0 1px var(--cs-borde-marca);
+}
+
+.cs-banda-marca--acento {
+  border-bottom: 0.375rem solid var(--marca-acento, transparent);
+}
+
+/* Círculo de marca (historias): inicial o ícono sobre el color de la marca. */
+.cs-circulo-marca {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  font-family: var(--cs-fuente-titulo);
+  font-size: var(--cs-texto-xl);
+  font-weight: 700;
+  color: var(--marca-texto, var(--cs-sobre-pri));
+  background: var(--marca-fondo, var(--cs-pri));
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--cs-fondo),
+    0 0 0 4px var(--marca-acento, var(--marca-fondo, var(--cs-pri))),
+    0 0 0 5px var(--cs-borde-marca);
+}
+
+/* Marcas conocidas: respaldo con sus colores oficiales cuando aún no llegan de la API. */
+.cs-marca--yanbal {
+  --marca-fondo: var(--cs-marca-yanbal);
+  --marca-texto: var(--cs-marca-yanbal-texto);
+}
+
+.cs-marca--avon {
+  --marca-fondo: var(--cs-marca-avon);
+  --marca-texto: var(--cs-marca-avon-texto);
+}
+
+.cs-marca--lbel {
+  --marca-fondo: var(--cs-marca-lbel);
+  --marca-texto: var(--cs-marca-lbel-texto);
+}
+
+.cs-marca--cyzone {
+  --marca-fondo: var(--cs-marca-cyzone);
+  --marca-texto: var(--cs-marca-cyzone-texto);
+}
+
+.cs-marca--esika {
+  --marca-fondo: var(--cs-marca-esika);
+  --marca-texto: var(--cs-marca-esika-texto);
+}
+
+.cs-marca--leonisa {
+  --marca-fondo: var(--cs-marca-leonisa);
+  --marca-texto: var(--cs-marca-leonisa-texto);
+  --marca-acento: var(--cs-marca-leonisa-acento);
+  --marca-texto-acento: var(--cs-marca-leonisa-texto-acento);
+}
+
+/* ---------- Hoja inferior (detalle): contenedor visual y ajuste de p-drawer ---------- */
+
+.cs-hoja-velo {
+  position: fixed;
+  inset: 0;
+  background: var(--cs-velo);
+}
+
+.cs-hoja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-4);
+  max-height: 88dvh;
+  padding: var(--cs-espacio-3) var(--cs-espacio-5) calc(var(--cs-espacio-5) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  color: var(--cs-texto);
+  background: var(--cs-sup);
+  border-radius: var(--cs-radio-hoja) var(--cs-radio-hoja) 0 0;
+  box-shadow: var(--cs-sombra-alta);
+}
+
+/* Asa para arrastrar; es decorativa: la hoja se cierra con el botón ✕ y con Esc. */
+.cs-hoja::before {
+  content: '';
+  flex: none;
+  align-self: center;
+  width: 2.5rem;
+  height: 0.3125rem;
+  background: var(--cs-borde);
+  border-radius: var(--cs-radio-pildora);
+}
+
+/* p-drawer con position="bottom" usado como hoja inferior. */
+.p-drawer.p-drawer-bottom {
+  border-radius: var(--cs-radio-hoja) var(--cs-radio-hoja) 0 0;
+  box-shadow: var(--cs-sombra-alta);
+}
+
+/* ---------- Movimiento ligero (solo CSS) ---------- */
+
+@keyframes cs-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cs-sube-hoja {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes cs-late {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.25);
+  }
+}
+
+.cs-aparece {
+  animation: cs-aparece var(--cs-duracion) var(--cs-curva) both;
+}
+
+.cs-hoja--entra {
+  animation: cs-sube-hoja var(--cs-duracion) var(--cs-curva) both;
+}
+
+/* Corazón de «guardar»: late una vez al activarse. */
+.cs-late {
+  animation: cs-late var(--cs-duracion) var(--cs-curva);
+}
+
+/* Escala al pulsar para cualquier control propio. */
+.cs-pulsable {
+  transition: transform var(--cs-duracion-corta) var(--cs-curva);
+}
+
+.cs-pulsable:active {
+  transform: scale(0.96);
+}
+
+/* ---------- Reducir movimiento (accesibilidad) ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .cs-chip--activo,
+  .cs-chip[aria-pressed='true'],
+  .cs-tarjeta--pulsable:hover {
+    transform: none;
+  }
+}

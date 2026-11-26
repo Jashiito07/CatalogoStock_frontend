@@ -14,16 +14,21 @@ import Aura from '@primeuix/themes/aura';
  * | Fondo      | #F8FAFC   |
  * | Texto      | #1E293B   |
  *
- * Modo oscuro con violeta (N2, maqueta D): fondo #0F172A, superficies #1E293B, bordes
- * #334155, texto #E2E8F0 y #CBD5E1; el Secundario #7C3AED pasa a ser el color de acción
- * (botones, chips activos) y su tono claro #C4B5FD sirve para precios y enlaces.
+ * Modo oscuro (D-41; rediseño, etapa 1, maqueta «Combinada»): fondo #0F172A, superficies
+ * #1E293B y #273449, bordes #334155, texto #F1F5F9 y #CBD5E1. El Primario sigue siendo el
+ * fondo de las acciones (texto blanco) y pasa a #60A5FA como texto o enlace; el Secundario
+ * (violeta) queda de apoyo y su tono claro #A78BFA sirve como texto.
  *
  * PrimeNG (Aura) resuelve ambos modos con `light-dark()`: la clase de `darkModeSelector`
  * (`app-oscuro`) fija `color-scheme: dark` y cada token usa su valor oscuro.
  *
+ * Forma: esquinas muy redondeadas (controles 14 px, tarjetas 26 px, botones y etiquetas en
+ * píldora) y sombras suaves (`--cs-sombra`). Sin vidrio translúcido.
+ *
  * Contraste (RNF-11): sobre el Acento el texto va en el color Texto, nunca en blanco.
  * Las escalas (50…950) se generan con `palette()`; el tono 500 es el color corporativo
- * y de las demás salen los estados hover, focus y activo.
+ * y de las demás salen los estados hover, focus y activo. Los valores fijos de este archivo
+ * deben coincidir con `colores.css` (lo comprueba `tokens-tema.spec.ts`).
  */
 export const COLORES_CORPORATIVOS = {
   primario: '#2563EB',
@@ -34,15 +39,18 @@ export const COLORES_CORPORATIVOS = {
   sobreColor: '#FFFFFF',
 } as const;
 
-/** Paleta del modo oscuro con violeta (maqueta D). */
+/** Paleta del modo oscuro (maqueta «Combinada»). */
 export const COLORES_OSCURO = {
   fondo: '#0F172A',
   superficie: '#1E293B',
+  superficie2: '#273449',
   borde: '#334155',
-  texto: '#E2E8F0',
+  texto: '#F1F5F9',
   textoSecundario: '#CBD5E1',
-  /** Tono claro del Secundario para precios y enlaces. */
-  violetaClaro: '#C4B5FD',
+  /** Primario como texto, enlace o ícono sobre oscuro. */
+  azulClaro: '#60A5FA',
+  /** Tono claro del Secundario para texto y enlaces. */
+  violetaClaro: '#A78BFA',
   /** Estados legibles sobre oscuro: error (rojo 300) y éxito (verde 300) de PrimeNG. */
   error: '#FCA5A5',
   exito: '#86EFAC',
@@ -73,10 +81,19 @@ const { texto, sobreColor } = COLORES_CORPORATIVOS;
 /** Valor `claro` en modo claro y `oscuro` en modo oscuro (CSS `light-dark()`). */
 const segunModo = (claro: string, oscuro: string) => `light-dark(${claro}, ${oscuro})`;
 
-/** Primario azul en claro; violeta (Secundario) en oscuro, tono a tono. */
-const escalaPrimaria = Object.fromEntries(
-  TONOS.map((tono) => [tono, segunModo(primario[tono], secundario[tono])]),
-) as Escala;
+/** Fondo de las acciones y de los controles marcados: Primario (azul) en ambos modos. */
+const escalaPrimaria: Escala = primario;
+
+/** Esquinas del rediseño (maqueta «Combinada»); las tarjetas usan 26 px y la hoja 34 px. */
+const RADIO_PILDORA = '999px';
+const BORDE_REDONDEADO = {
+  none: '0',
+  xs: '6px',
+  sm: '10px',
+  md: '14px',
+  lg: '18px',
+  xl: '26px',
+} as const;
 
 const superficies = Object.fromEntries(
   TONOS.map((tono) => [tono, `{slate.${tono}}`]),
@@ -122,23 +139,30 @@ const avisosLegibles = Object.fromEntries(
 );
 
 export const TemaCatalogoStock = definePreset(Aura, {
+  primitive: {
+    borderRadius: BORDE_REDONDEADO,
+  },
   semantic: {
     // Superficies: escala slate en ambos modos (Aura usa zinc en oscuro).
     surface: { 0: '#ffffff', ...superficies },
+    // Velo detrás de la hoja inferior y de los diálogos (`--cs-velo`).
+    mask: { background: 'var(--cs-velo)', color: '{surface.0}' },
     primary: {
       ...escalaPrimaria,
-      color: segunModo('{primary.500}', '{primary.300}'),
+      // Como texto o enlace: azul 500 en claro; azul claro (#60A5FA) en oscuro.
+      color: segunModo('{primary.500}', COLORES_OSCURO.azulClaro),
       contrastColor: segunModo(sobreColor, COLORES_OSCURO.fondo),
-      hoverColor: segunModo('{primary.600}', '{primary.200}'),
-      activeColor: segunModo('{primary.700}', '{primary.100}'),
+      hoverColor: segunModo('{primary.600}', '{primary.300}'),
+      activeColor: segunModo('{primary.700}', '{primary.200}'),
     },
     text: {
       color: segunModo(texto, COLORES_OSCURO.texto),
-      mutedColor: segunModo('{surface.500}', COLORES_OSCURO.textoSecundario),
+      // Tono 600: sobre la superficie secundaria el 500 queda en 4.3:1 (RNF-11).
+      mutedColor: segunModo('{surface.600}', COLORES_OSCURO.textoSecundario),
     },
     content: {
       background: segunModo('{surface.0}', COLORES_OSCURO.superficie),
-      hoverBackground: segunModo('{surface.100}', '{surface.700}'),
+      hoverBackground: segunModo('{surface.100}', COLORES_OSCURO.superficie2),
       borderColor: segunModo('{surface.200}', COLORES_OSCURO.borde),
     },
     overlay: {
@@ -161,12 +185,17 @@ export const TemaCatalogoStock = definePreset(Aura, {
       filledBackground: segunModo('{surface.50}', COLORES_OSCURO.fondo),
       filledHoverBackground: segunModo('{surface.50}', COLORES_OSCURO.fondo),
       filledFocusBackground: segunModo('{surface.50}', COLORES_OSCURO.fondo),
+      // Borde de los campos con al menos 3:1 (no textual): `--cs-ctl`.
+      borderColor: segunModo('{surface.500}', '{surface.400}'),
+      hoverBorderColor: segunModo('{surface.600}', '{surface.300}'),
     },
   },
   components: {
     button: {
       root: {
-        // Principal: Primario en claro; Secundario (violeta) con texto blanco en oscuro.
+        // Botones en píldora (maqueta «Combinada»).
+        borderRadius: RADIO_PILDORA,
+        // Principal: Primario (azul) con texto blanco en claro y en oscuro (5.17:1).
         primary: {
           background: '{primary.500}',
           hoverBackground: '{primary.600}',
@@ -178,17 +207,17 @@ export const TemaCatalogoStock = definePreset(Aura, {
           hoverColor: sobreColor,
           activeColor: sobreColor,
         },
-        // Secundario: violeta con texto blanco en claro; superficie elevada en oscuro.
+        // Secundario: violeta con texto blanco en ambos modos (5.70:1).
         secondary: {
-          background: segunModo(secundario[500], COLORES_OSCURO.borde),
-          hoverBackground: segunModo(secundario[600], '{surface.600}'),
-          activeBackground: segunModo(secundario[700], '{surface.500}'),
-          borderColor: segunModo(secundario[500], COLORES_OSCURO.borde),
-          hoverBorderColor: segunModo(secundario[600], '{surface.600}'),
-          activeBorderColor: segunModo(secundario[700], '{surface.500}'),
-          color: segunModo(sobreColor, COLORES_OSCURO.texto),
-          hoverColor: segunModo(sobreColor, COLORES_OSCURO.texto),
-          activeColor: segunModo(sobreColor, COLORES_OSCURO.texto),
+          background: secundario[500],
+          hoverBackground: secundario[600],
+          activeBackground: secundario[700],
+          borderColor: secundario[500],
+          hoverBorderColor: secundario[600],
+          activeBorderColor: secundario[700],
+          color: sobreColor,
+          hoverColor: sobreColor,
+          activeColor: sobreColor,
           focusRing: { color: segunModo(secundario[500], secundario[300]), shadow: 'none' },
         },
         // El Acento lleva texto oscuro: el blanco sobre naranja no cumple 4.5:1.
@@ -206,6 +235,11 @@ export const TemaCatalogoStock = definePreset(Aura, {
         },
       },
       outlined: {
+        // Borde y texto con al menos 3:1 (los chips de filtro son botones con contorno).
+        primary: {
+          borderColor: segunModo('{primary.500}', COLORES_OSCURO.azulClaro),
+          color: segunModo('{primary.500}', COLORES_OSCURO.azulClaro),
+        },
         secondary: {
           hoverBackground: segunModo(
             secundario[50],
@@ -257,6 +291,29 @@ export const TemaCatalogoStock = definePreset(Aura, {
     },
     message: mensajesLegibles,
     toast: avisosLegibles,
+    // Tarjetas muy redondeadas con sombra suave (la misma de `.cs-tarjeta`).
+    card: {
+      root: {
+        borderRadius: '{border.radius.xl}',
+        shadow: 'var(--cs-sombra)',
+      },
+    },
+    // Etiquetas de estado en píldora (siempre con texto e ícono).
+    tag: {
+      root: {
+        borderRadius: RADIO_PILDORA,
+      },
+      colorScheme: {
+        // Etiqueta neutra («Cliente»): superficie secundaria con texto de 4.5:1 o más.
+        light: { secondary: { background: '{surface.100}', color: '{surface.700}' } },
+        dark: {
+          secondary: {
+            background: COLORES_OSCURO.superficie2,
+            color: COLORES_OSCURO.textoSecundario,
+          },
+        },
+      },
+    },
     badge: {
       secondary: {
         background: secundario[500],

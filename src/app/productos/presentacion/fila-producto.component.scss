@@ -8,16 +8,17 @@
   align-items: stretch;
   min-height: 5.5rem;
   padding: 0.5rem;
-  background: var(--cs-superficie);
+  background: var(--cs-sup);
   border: 1px solid var(--cs-borde);
-  border-radius: 0.875rem;
+  border-radius: var(--cs-radio-tarjeta);
+  box-shadow: var(--cs-sombra);
 }
 
 .fila__miniatura {
   flex: none;
   --p-avatar-width: 4.875rem;
   --p-avatar-height: 4.875rem;
-  --p-avatar-border-radius: 0.75rem;
+  --p-avatar-border-radius: var(--cs-radio-control);
   width: 4.875rem;
   height: 4.875rem;
 }
@@ -25,7 +26,7 @@
 /* La foto llena la miniatura, recortada con las esquinas redondeadas del diseño B. */
 :host ::ng-deep .fila__miniatura {
   overflow: hidden;
-  border-radius: 0.75rem;
+  border-radius: var(--cs-radio-control);
 }
 
 :host ::ng-deep .fila__miniatura img {
@@ -55,11 +56,11 @@
 .fila__marca {
   align-self: flex-start;
   padding: 0.0625rem 0.5rem;
-  border-radius: 99px;
+  border-radius: var(--cs-radio-pildora);
   font-size: 0.75rem;
   font-weight: 600;
-  background: var(--marca-fondo, var(--cs-primario));
-  color: var(--marca-texto, var(--cs-sobre-primario));
+  background: var(--marca-fondo, var(--cs-pri));
+  color: var(--marca-texto, var(--cs-sobre-pri));
   /* Un fondo casi negro (L'Bel) se perdería sobre la superficie oscura: borde visible. */
   box-shadow: 0 0 0 1px var(--cs-borde-marca);
 }
@@ -76,7 +77,7 @@
 .fila__precio {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--cs-primario);
+  color: var(--cs-pri-t);
 }
 
 /* Disponibilidad (RN-09): texto, ícono y color; los tres estados se ven, ninguno se oculta. */
@@ -89,10 +90,10 @@
   color: var(--cs-disponible-texto);
 }
 
-/* Acento con el texto corporativo #1E293B, nunca blanco (RNF-11). */
+/* Agotado: rojo legible con texto e ícono (RNF-11); el color nunca va solo. */
 :host ::ng-deep .fila__estado--agotado {
-  background: var(--cs-acento);
-  color: var(--cs-sobre-acento);
+  background: var(--cs-mal-bg);
+  color: var(--cs-mal);
 }
 
 :host ::ng-deep .fila__estado--pendiente_reposicion {

@@ -309,10 +309,13 @@ disponibilidad. Los agotados y pendientes de reposición se muestran (RN-09).
 - **Forzar el tema en desarrollo** (solo con `ng serve`/`isDevMode()`, nunca en producción):
   abre `http://localhost:4200/inicio?tema=oscuro` (o `claro`, `automatico`). No se guarda.
   Para forzarlo como usuario: Inicio → Apariencia → Tema.
-- **Paleta oscura**: fondo `#0F172A`, superficies `#1E293B`, bordes `#334155`, texto
-  `#E2E8F0` / `#CBD5E1`; acción principal = Secundario `#7C3AED` (texto blanco); precios y
-  enlaces en `#C4B5FD`; el Acento `#F97316` conserva siempre texto `#1E293B`. Los contrastes
-  (RNF-11 ≥ 4.5:1) se comprueban en `presentacion/tema/contraste.spec.ts`.
+- **Paleta oscura** (rediseño, etapa 1, maqueta «Combinada»): fondo `#0F172A`, superficies
+  `#1E293B` / `#273449`, bordes `#334155`, texto `#F1F5F9` / `#CBD5E1`; la acción principal
+  sigue siendo el Primario `#2563EB` (texto blanco) y, como texto o enlace, `#60A5FA`; el
+  violeta (`#7C3AED`, `#A78BFA` como texto) queda de apoyo; el Acento `#F97316` conserva
+  siempre texto `#1E293B`. Los contrastes (RNF-11 ≥ 4.5:1 en texto y ≥ 3:1 en bordes y
+  gráficos) se comprueban sobre los tokens reales en `presentacion/tema/tokens-tema.spec.ts`
+  y `contraste.spec.ts`.
 
 ## Demostración por internet (túnel)
 
@@ -395,11 +398,24 @@ infraestructura┘
 - Todos los controles visibles son de **PrimeNG**. Los botones usan la directiva
   `<button pButton>` (el componente `p-button` está obsoleto desde PrimeNG 22). Ionic solo aporta `ion-app`,
   `ion-router-outlet`, `ion-content` (desplazamiento y área segura) y la navegación.
-- Colores corporativos definidos una sola vez en `compartido/presentacion/tema/`
-  (`--cs-primario`, `--cs-secundario`, `--cs-acento`, `--cs-fondo`, `--cs-texto`).
-  No se escriben colores hexadecimales en los componentes.
+- Colores corporativos definidos una sola vez en `compartido/presentacion/tema/`: tokens
+  `--cs-*` en `colores.css` (`--cs-fondo`, `--cs-sup`, `--cs-texto`, `--cs-pri` / `--cs-pri-t`,
+  `--cs-sec` / `--cs-sec-t`, `--cs-acento`, estados `--cs-ok|warn|mal|info`, marcas
+  `--cs-marca-*`…) y preset de PrimeNG en `tema-catalogostock.ts`. Los nombres anteriores
+  (`--cs-primario`, `--cs-superficie`…) siguen como alias. No se escriben colores
+  hexadecimales en los componentes (lo comprueba `tokens-tema.spec.ts`).
+- `--cs-pri` / `--cs-sec` son fondos de acciones; para texto, enlaces e íconos usa
+  `--cs-pri-t` / `--cs-sec-t` (cambian en oscuro para cumplir el contraste).
+- Tipografía: pila del sistema; serifa (`--cs-fuente-titulo`) solo en títulos y nombres de
+  marca (`.cs-titulo`, `.cs-subtitulo`, `.cs-nombre-marca`). Sin fuentes remotas.
+- Forma y movimiento: esquinas grandes (`--cs-radio-*`), sombras suaves (`--cs-sombra`),
+  animaciones solo CSS que se apagan con `prefers-reduced-motion`; sin `backdrop-filter`.
+- Clases compartidas (`tema/utilidades.css`): `.cs-tarjeta`, `.cs-chip`, `.cs-etiqueta`
+  (`--ok|warn|mal|info|acento`, siempre con texto e ícono), `.cs-banda-marca`,
+  `.cs-circulo-marca`, `.cs-marca--<marca>` (colores de las marcas conocidas, D-43/D-56),
+  `.cs-hoja` (hoja inferior).
 - Sobre el Acento el texto va en el color Texto, nunca en blanco (RNF-11).
-- Controles táctiles de al menos 48 px (RNF-10).
+- Controles táctiles de al menos 48 px (RNF-10); chips y etiquetas, al menos 44 px.
 
 ## Git
 

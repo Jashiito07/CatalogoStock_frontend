@@ -95,7 +95,7 @@
         [style.--marca-acento]="marca.acento"
         [style.--marca-texto-acento]="marca.textoAcento"
       >
-        <h2 class="marca-cabecera__nombre">{{ marca.nombre }}</h2>
+        <h2 class="marca-cabecera__nombre cs-nombre-marca">{{ marca.nombre }}</h2>
         @if (estado() === 'listo') {
           <span class="marca-cabecera__total">{{ resumen() }}</span>
         }
