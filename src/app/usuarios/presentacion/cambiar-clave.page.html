@@ -1,6 +1,6 @@
 <ion-content>
-  <main class="cs-pagina">
-    <header class="cs-encabezado-marca">
+  <main class="cs-pagina cs-acceso">
+    <header class="cs-acceso__cabecera">
       <a pButton routerLink="/cuenta" severity="secondary" [text]="true">
         <i class="pi pi-arrow-left" aria-hidden="true"></i>
         Volver a mi cuenta
@@ -97,6 +97,7 @@
           <button
             pButton
             type="submit"
+            [rounded]="true"
             [fluid]="true"
             [loading]="enviando()"
             [disabled]="enviando() || !enLinea()"

@@ -34,6 +34,7 @@
           pButton
           id="correo-enviar-codigo"
           type="submit"
+          [rounded]="true"
           [fluid]="true"
           [loading]="solicitando()"
           [disabled]="solicitando() || !enLinea() || espera.segundos() > 0"
@@ -135,6 +136,7 @@
           pButton
           id="correo-restablecer"
           type="submit"
+          [rounded]="true"
           [fluid]="true"
           [loading]="restableciendo()"
           [disabled]="restableciendo() || !enLinea()"

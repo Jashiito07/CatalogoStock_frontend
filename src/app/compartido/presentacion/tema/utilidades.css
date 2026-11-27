@@ -4,7 +4,7 @@
  * (colores.css): sin hexadecimales, sin `backdrop-filter` y con animaciones ligeras de CSS.
  *
  * Índice: tipografía · tarjeta · chip · etiqueta de estado · marca · hoja inferior ·
- *         movimiento · reducir movimiento.
+ *         acceso · movimiento · reducir movimiento.
  */
 
 /* ---------- Tipografía: serifa solo para títulos y nombres de marca ---------- */
@@ -372,6 +372,91 @@
 .p-tag.cs-etiqueta--mal {
   background: var(--cs-mal-bg);
   color: var(--cs-mal);
+}
+
+/* ---------- Pantallas de acceso: ingreso, registro, recuperar y cambiar clave ---------- */
+
+/* Misma familia visual que Inicio, Explorar y Cuenta: cabecera con degradado suave,
+   logo en un recuadro redondeado, serifa en el título y tarjeta con esquinas amplias. */
+.cs-acceso {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+}
+
+.cs-acceso::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 14rem;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 90% at 0% 0%, color-mix(in srgb, var(--cs-pri) 18%, transparent), transparent),
+    radial-gradient(60% 80% at 100% 10%, color-mix(in srgb, var(--cs-sec) 16%, transparent), transparent);
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+}
+
+.cs-acceso__cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cs-espacio-2);
+}
+
+.cs-acceso__cabecera app-logo {
+  --cs-logo-ancho: 3.5rem;
+  overflow: hidden;
+  border-radius: var(--cs-radio-control);
+  box-shadow: var(--cs-sombra);
+}
+
+.cs-acceso .cs-ayuda {
+  color: var(--cs-texto2);
+}
+
+/* El enlace «Volver» queda a ras del borde para alinear su texto con el del título. */
+.cs-acceso__volver.p-button {
+  margin-inline-start: calc(var(--cs-espacio-3) * -1);
+}
+
+/* Tarjeta de PrimeNG con las esquinas, el borde y la sombra de `.cs-tarjeta`. */
+.cs-acceso p-card,
+p-card.cs-card-redonda {
+  --p-card-background: var(--cs-sup);
+  --p-card-color: var(--cs-texto);
+  --p-card-border-radius: var(--cs-radio-tarjeta);
+  --p-card-shadow: var(--cs-sombra);
+  display: block;
+}
+
+.cs-acceso .p-card,
+p-card.cs-card-redonda .p-card {
+  border: 1px solid var(--cs-borde);
+}
+
+/* Selector de modo (p. ej. «Por correo» / «Con mi vendedor»): ancho completo y táctil de 48 px. */
+.cs-acceso .p-selectbutton {
+  display: flex;
+  width: 100%;
+}
+
+.cs-acceso .p-togglebutton {
+  flex: 1;
+  min-height: var(--cs-control-minimo);
+}
+
+/* Botones de acción principales: más altos (≥ 48 px, RNF-10). */
+.cs-acceso .cs-acciones .p-button {
+  min-height: 3.25rem;
+}
+
+/* Foco visible en los controles de estas pantallas (RNF-10). */
+.cs-acceso .p-button:focus-visible,
+.cs-acceso .p-inputtext:focus-visible,
+.cs-acceso .p-togglebutton:focus-visible {
+  outline: 3px solid var(--cs-pri-t);
+  outline-offset: 2px;
 }
 
 /* ---------- Movimiento ligero (solo CSS) ---------- */

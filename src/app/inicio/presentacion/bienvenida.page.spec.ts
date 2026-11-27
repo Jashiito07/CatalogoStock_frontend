@@ -36,7 +36,7 @@ describe('BienvenidaPage (PLAN 1.6, PA-12)', () => {
     const elemento = await abrir();
 
     // D-38: logo horizontal oficial como imagen, con el nombre como texto alternativo.
-    const logo = elemento.querySelector<HTMLImageElement>('h1 img');
+    const logo = elemento.querySelector<HTMLImageElement>('app-logo img');
     expect(logo?.getAttribute('src')).toBe('marca/catalogostock-logo-horizontal.svg');
     expect(logo?.alt).toBe('CatálogoStock');
     const enlaces = Array.from(elemento.querySelectorAll('a')).map((a) => ({
@@ -47,7 +47,28 @@ describe('BienvenidaPage (PLAN 1.6, PA-12)', () => {
       { texto: 'Crear cuenta', destino: '/registro' },
       { texto: 'Iniciar sesión', destino: '/ingreso' },
     ]);
-    expect(elemento.querySelector('p-badge')).not.toBeNull();
+    // La insignia «Nuevo» no significaba nada real y se quitó.
+    expect(elemento.querySelector('p-badge')).toBeNull();
+  });
+
+  it('muestra el titular, la propuesta y tres puntos con ícono, sin prometer carrito ni pagos', async () => {
+    const elemento = await abrir();
+
+    expect(elemento.querySelector('h1')?.textContent?.trim()).toBe('Tu catálogo, siempre contigo');
+    expect(elemento.textContent).toContain('Compra por catálogo, incluso sin conexión.');
+    const puntos = elemento.querySelectorAll('ul li');
+    expect(puntos.length).toBe(3);
+    for (const punto of Array.from(puntos)) {
+      expect(punto.querySelector('i.pi')).not.toBeNull();
+    }
+    expect(elemento.textContent).not.toMatch(/carrito|pago/i);
+  });
+
+  it('ofrece el selector de tema y marca el collage como decorativo', async () => {
+    const elemento = await abrir();
+
+    expect(elemento.querySelector('app-selector-tema p-selectbutton')).not.toBeNull();
+    expect(elemento.querySelector('.bienvenida__collage')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('no muestra avisos técnicos si la base local abre (RNF-06)', async () => {

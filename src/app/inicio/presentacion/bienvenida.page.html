@@ -1,40 +1,86 @@
 <ion-content>
   <main class="bienvenida">
-    <header class="bienvenida__encabezado">
+    <header class="bienvenida__marca">
       <!-- D-38: logo oficial; su texto alternativo es el nombre de la app. -->
-      <h1 class="bienvenida__logo"><app-logo variante="horizontal" /></h1>
-      <p-badge value="Nuevo" severity="warn" />
+      <app-logo variante="horizontal" />
     </header>
 
-    <p-card
-      header="¡Te damos la bienvenida!"
-      subheader="Compra por catálogo, incluso sin conexión."
-    >
-      <p class="bienvenida__texto">
-        Explora productos de Yanbal, Avon, L'Bel y otras marcas, arma tu carrito y envía tu
-        pedido a tu vendedora o vendedor.
-      </p>
-      <p class="bienvenida__texto">Para ver el catálogo, crea tu cuenta o inicia sesión.</p>
-
-      @if (baseLocalDisponible() === false) {
-        <p-message severity="error" role="alert">
-          No se pudo abrir el almacenamiento del dispositivo. Cierra y vuelve a abrir la
-          aplicación.
-        </p-message>
+    <!-- Collage decorativo: círculos con los colores de las marcas conocidas (D-43). -->
+    <div class="bienvenida__collage" aria-hidden="true">
+      <span class="bienvenida__forma bienvenida__forma--grande"></span>
+      <span class="bienvenida__forma bienvenida__forma--chica"></span>
+      @for (marca of marcas; track marca.clase) {
+        <p-avatar
+          class="bienvenida__circulo {{ marca.clase }}"
+          shape="circle"
+          [label]="marca.iniciales"
+          [style.--x]="marca.x"
+          [style.--y]="marca.y"
+          [style.--d]="marca.diametro"
+        />
       }
+    </div>
 
-      <ng-template #footer>
-        <div class="bienvenida__acciones">
-          <a pButton routerLink="/registro" [fluid]="true">
-            <i class="pi pi-user-plus" aria-hidden="true"></i>
-            Crear cuenta
-          </a>
-          <a pButton routerLink="/ingreso" severity="secondary" [outlined]="true" [fluid]="true">
-            <i class="pi pi-sign-in" aria-hidden="true"></i>
-            Iniciar sesión
-          </a>
-        </div>
-      </ng-template>
-    </p-card>
+    <section class="bienvenida__texto" aria-labelledby="bienvenida-titular">
+      <p class="cs-kicker">Yanbal · Avon · L'Bel y más</p>
+      <h1 id="bienvenida-titular" class="cs-titulo bienvenida__titular">
+        Tu catálogo, siempre contigo
+      </h1>
+      <p class="bienvenida__subtitulo">Compra por catálogo, incluso sin conexión.</p>
+    </section>
+
+    <ul class="bienvenida__puntos">
+      <li class="bienvenida__punto">
+        <span class="bienvenida__icono" aria-hidden="true"><i class="pi pi-book"></i></span>
+        <span class="bienvenida__punto-texto">
+          <strong>Catálogo de tus marcas</strong>
+          <span class="bienvenida__detalle">Explora productos de Yanbal, Avon, L'Bel y otras marcas.</span>
+        </span>
+      </li>
+      <li class="bienvenida__punto">
+        <span class="bienvenida__icono" aria-hidden="true"><i class="pi pi-wifi"></i></span>
+        <span class="bienvenida__punto-texto">
+          <strong>Pensada para usarse sin conexión</strong>
+          <span class="bienvenida__detalle">Tu sesión y tus datos guardados siguen contigo sin internet.</span>
+        </span>
+      </li>
+      <li class="bienvenida__punto">
+        <span class="bienvenida__icono" aria-hidden="true"><i class="pi pi-moon"></i></span>
+        <span class="bienvenida__punto-texto">
+          <strong>Tema claro u oscuro</strong>
+          <span class="bienvenida__detalle">Elige cómo verla o deja que se adapte a la hora del día.</span>
+        </span>
+      </li>
+    </ul>
+
+    @if (baseLocalDisponible() === false) {
+      <p-message severity="error" role="alert">
+        No se pudo abrir el almacenamiento del dispositivo. Cierra y vuelve a abrir la
+        aplicación.
+      </p-message>
+    }
+
+    <div class="bienvenida__acciones">
+      <a pButton routerLink="/registro" size="large" [rounded]="true" [fluid]="true">
+        <i class="pi pi-user-plus" aria-hidden="true"></i>
+        Crear cuenta
+      </a>
+      <a
+        pButton
+        routerLink="/ingreso"
+        size="large"
+        severity="secondary"
+        [rounded]="true"
+        [outlined]="true"
+        [fluid]="true"
+      >
+        <i class="pi pi-sign-in" aria-hidden="true"></i>
+        Iniciar sesión
+      </a>
+    </div>
+
+    <footer class="bienvenida__pie">
+      <app-selector-tema />
+    </footer>
   </main>
 </ion-content>
