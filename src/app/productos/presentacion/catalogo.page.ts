@@ -10,20 +10,27 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { IonContent } from '@ionic/angular';
+import { ActivatedRoute } from '@angular/router';
+import { IonContent, IonFooter } from '@ionic/angular';
 import { ButtonDirective } from 'primeng/button';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
-import { Select } from 'primeng/select';
 import { Skeleton } from 'primeng/skeleton';
+import { skip } from 'rxjs';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
 import { ErrorSinConexion } from '../../compartido/dominio/error-api';
-import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
+import { BandaMarcaComponent } from '../../compartido/presentacion/banda-marca/banda-marca.component';
+import { BarraPestanasComponent } from '../../compartido/presentacion/barra-pestanas/barra-pestanas.component';
+import { ChipsFiltroComponent } from '../../compartido/presentacion/chips-filtro/chips-filtro.component';
+import { CirculoMarcaComponent } from '../../compartido/presentacion/circulo-marca/circulo-marca.component';
+import { HojaProductoComponent } from '../../compartido/presentacion/hoja-producto/hoja-producto.component';
+import { TarjetaProductoComponent } from '../../compartido/presentacion/tarjeta-producto/tarjeta-producto.component';
+import { VistaMarca, VistaProducto } from '../../compartido/presentacion/vistas';
 import { ConsultarMarcas } from '../aplicacion/casos-uso/consultar-marcas.caso-uso';
 import { ConsultarProductos } from '../aplicacion/casos-uso/consultar-productos.caso-uso';
 import {
@@ -33,9 +40,9 @@ import {
   LARGO_MAXIMO_BUSQUEDA,
   SIN_FILTROS,
 } from '../dominio/consulta';
-import { Marca, textoLegibleSobre } from '../dominio/marca';
-import { Disponibilidad, DISPONIBILIDADES, etiquetaDisponibilidad, Producto } from '../dominio/producto';
-import { FilaProductoComponent } from './fila-producto.component';
+import { Marca } from '../dominio/marca';
+import { Disponibilidad, esDisponibilidad, Producto } from '../dominio/producto';
+import { aVistaMarca, aVistaProducto, OPCIONES_DISPONIBILIDAD } from './vista-producto';
 
 /** Espera tras la última tecla antes de pedir la búsqueda al servidor (RF-CAT-03). */
 export const RETARDO_BUSQUEDA_MS = 350;
@@ -45,40 +52,36 @@ export const MENSAJE_SIN_CONEXION =
 
 type Estado = 'cargando' | 'listo' | 'error' | 'sinConexion';
 
-interface OpcionDisponibilidad {
-  readonly etiqueta: string;
-  readonly valor: Disponibilidad;
-}
-
-/** Colores ya resueltos de la marca elegida para la cabecera (D-43). */
-interface CabeceraMarca {
-  readonly nombre: string;
-  readonly color: string;
-  readonly texto: string;
-  readonly acento: string | null;
-  readonly textoAcento: string | null;
-}
+/** Parámetros de la ruta `/catalogo?marca=<id>&disponibilidad=<estado>` (accesos desde Inicio). */
+const PARAMETRO_MARCA = 'marca';
+const PARAMETRO_DISPONIBILIDAD = 'disponibilidad';
+const PATRON_ID_MARCA = /^[\w-]{1,64}$/;
 
 /**
- * Catálogo en línea con la lista compacta B (RF-CAT-03, RF-CAT-05, D-41, D-42, D-43).
- * Subfase 2.7: pide al servidor; el catálogo en SQLite y sin conexión llega en la Fase 4.
- * No calcula precios, estados ni disponibilidad: los muestra como los entrega el servidor.
+ * Explorar: catálogo en línea con círculos de marca, chips de disponibilidad, banner de la
+ * marca elegida y rejilla de tarjetas; el detalle se abre en una hoja inferior (RF-CAT-03,
+ * RF-CAT-05, D-41, D-43). Pide al servidor; el catálogo en SQLite y sin conexión llega en la
+ * Fase 4. No calcula precios, estados ni disponibilidad: los muestra como los entrega el
+ * servidor (RN-07, RN-09).
  */
 @Component({
   selector: 'app-catalogo',
   imports: [
     IonContent,
-    RouterLink,
+    IonFooter,
     FormsModule,
-    LogoComponent,
-    FilaProductoComponent,
     ButtonDirective,
     IconField,
     InputIcon,
     InputText,
     Message,
-    Select,
     Skeleton,
+    BandaMarcaComponent,
+    BarraPestanasComponent,
+    ChipsFiltroComponent,
+    CirculoMarcaComponent,
+    HojaProductoComponent,
+    TarjetaProductoComponent,
   ],
   templateUrl: './catalogo.page.html',
   styleUrl: './catalogo.page.scss',
@@ -89,12 +92,16 @@ export class CatalogoPage implements OnInit {
   private readonly consultarMarcas = inject(ConsultarMarcas);
   private readonly conectividad = inject(CONECTIVIDAD);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly ruta = inject(ActivatedRoute);
 
   protected readonly largoMaximoBusqueda = LARGO_MAXIMO_BUSQUEDA;
   protected readonly mensajeSinConexion = MENSAJE_SIN_CONEXION;
-  protected readonly opcionesDisponibilidad: OpcionDisponibilidad[] =
-    DISPONIBILIDADES.map((valor) => ({ valor, etiqueta: etiquetaDisponibilidad(valor) }));
-  protected readonly esqueletos = [1, 2, 3, 4, 5];
+  protected readonly opcionesDisponibilidad = OPCIONES_DISPONIBILIDAD;
+  protected readonly esqueletos = [1, 2, 3, 4];
+
+  /** Producto abierto en la hoja inferior; se conserva al cerrar para la animación. */
+  protected readonly seleccionado = signal<VistaProducto | null>(null);
+  protected readonly hojaAbierta = signal(false);
 
   protected readonly marcas = signal<readonly Marca[]>([]);
   protected readonly productos = signal<readonly Producto[]>([]);
@@ -117,20 +124,14 @@ export class CatalogoPage implements OnInit {
   }));
   protected readonly conFiltros = computed(() => hayFiltros(this.filtro()));
   protected readonly hayMas = computed(() => hayMasProductos(this.productos().length, this.total()));
-  protected readonly cabecera = computed<CabeceraMarca | null>(() => {
-    const marca = this.marcas().find((m) => m.id === this.marcaId());
-    if (!marca) return null;
-    return {
-      nombre: marca.nombre,
-      color: marca.color,
-      texto: textoLegibleSobre(marca.color, marca.textoSobreColor),
-      acento: marca.colorAcento,
-      textoAcento:
-        marca.colorAcento === null
-          ? null
-          : textoLegibleSobre(marca.colorAcento, marca.textoSobreAcento),
-    };
-  });
+  protected readonly vistaMarcas = computed<readonly VistaMarca[]>(() => this.marcas().map(aVistaMarca));
+  /** Marca elegida: su banner (RF-CAT-05, D-43). */
+  protected readonly cabecera = computed<VistaMarca | null>(
+    () => this.vistaMarcas().find((m) => m.id === this.marcaId()) ?? null,
+  );
+  protected readonly vistaProductos = computed<readonly VistaProducto[]>(() =>
+    this.productos().map(aVistaProducto),
+  );
   protected readonly resumen = computed(() => {
     const total = this.total();
     return `${total} ${total === 1 ? 'producto' : 'productos'}`;
@@ -175,7 +176,27 @@ export class CatalogoPage implements OnInit {
       })
       .then((dejarDeOir) => this.destroyRef.onDestroy(dejarDeOir));
 
+    // Acceso desde Inicio («Ver todo» o un círculo de marca): llega con la marca en la ruta.
+    this.aplicarParametros(false);
+    this.ruta.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.aplicarParametros(true));
+
     void this.iniciar();
+  }
+
+  /** Lee marca y disponibilidad de la ruta; con `recargar` vuelve a pedir la lista. */
+  private aplicarParametros(recargar: boolean): void {
+    const parametros = this.ruta.snapshot.queryParamMap;
+    const marca = parametros.get(PARAMETRO_MARCA);
+    const disponible = parametros.get(PARAMETRO_DISPONIBILIDAD);
+    if (marca === null && disponible === null && !recargar) return;
+    const nuevaMarca = marca !== null && PATRON_ID_MARCA.test(marca) ? marca : null;
+    const nuevaDisponibilidad = esDisponibilidad(disponible) ? disponible : null;
+    if (nuevaMarca === this.marcaId() && nuevaDisponibilidad === this.disponibilidad()) return;
+    this.marcaId.set(nuevaMarca);
+    this.disponibilidad.set(nuevaDisponibilidad);
+    if (recargar) void this.cargarPrimeraPagina();
   }
 
   private async iniciar(): Promise<void> {
@@ -242,15 +263,27 @@ export class CatalogoPage implements OnInit {
     return Promise.all([faltanMarcas, this.cargarPrimeraPagina()]).then(() => undefined);
   }
 
+  /** Tocar el círculo de la marca elegida la quita del filtro. */
   protected elegirMarca(id: string | null): void {
-    if (this.marcaId() === id) return;
-    this.marcaId.set(id);
+    const nueva = this.marcaId() === id ? null : id;
+    if (this.marcaId() === nueva) return;
+    this.marcaId.set(nueva);
     void this.cargarPrimeraPagina();
   }
 
   protected elegirDisponibilidad(valor: Disponibilidad | null): void {
     this.disponibilidad.set(valor);
     void this.cargarPrimeraPagina();
+  }
+
+  /** Los chips entregan texto; solo se aceptan los estados del servidor. */
+  protected elegirDisponibilidadChip(valor: string | null): void {
+    this.elegirDisponibilidad(esDisponibilidad(valor) ? valor : null);
+  }
+
+  protected abrirDetalle(producto: VistaProducto): void {
+    this.seleccionado.set(producto);
+    this.hojaAbierta.set(true);
   }
 
   /** Búsqueda con retardo: se pide al servidor cuando el Cliente deja de escribir. */
@@ -281,7 +314,4 @@ export class CatalogoPage implements OnInit {
     void this.cargarPrimeraPagina();
   }
 
-  protected rastrear(_indice: number, producto: Producto): string {
-    return producto.id;
-  }
 }

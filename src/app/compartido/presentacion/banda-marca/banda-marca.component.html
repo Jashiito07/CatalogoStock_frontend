@@ -1,0 +1,29 @@
+<section
+  class="cs-banda-marca banda"
+  [class.cs-banda-marca--acento]="marca().acento !== null"
+  [style.--marca-fondo]="marca().color"
+  [style.--marca-texto]="marca().texto"
+  [style.--marca-acento]="marca().acento"
+  [style.--marca-texto-acento]="marca().textoAcento"
+  [attr.aria-label]="'Marca ' + marca().nombre"
+>
+  <div class="banda__texto">
+    @if (detalle()) {
+      <p class="banda__detalle">{{ detalle() }}</p>
+    }
+    <h2 class="banda__nombre cs-nombre-marca">{{ marca().nombre }}</h2>
+    @if (conVerTodo()) {
+      <button
+        pButton
+        type="button"
+        class="banda__boton"
+        [rounded]="true"
+        [attr.aria-label]="'Ver todos los productos de ' + marca().nombre"
+        (click)="verTodo.emit()"
+      >
+        Ver todo
+        <i class="pi pi-angle-right" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+</section>

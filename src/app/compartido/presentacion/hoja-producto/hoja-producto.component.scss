@@ -1,0 +1,81 @@
+.hoja {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cs-espacio-3);
+}
+
+.hoja__titulo-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.hoja__imagen {
+  align-self: stretch;
+  height: 16.875rem;
+  overflow: hidden;
+  background: var(--cs-sup2);
+  border-radius: var(--cs-radio-tarjeta);
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.hoja__imagen--atenuada {
+  filter: grayscale(1);
+  opacity: 0.75;
+}
+
+.hoja__marcador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--cs-texto2);
+
+  > .pi {
+    font-size: 3rem;
+  }
+}
+
+.hoja__nombre {
+  font-size: var(--cs-texto-xl);
+  overflow-wrap: anywhere;
+}
+
+.hoja__precio-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-espacio-3);
+}
+
+.hoja__precio {
+  font-size: var(--cs-texto-2xl);
+}
+
+.hoja__descripcion {
+  margin: 0;
+  color: var(--cs-texto);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.hoja__agregar {
+  align-self: stretch;
+}
+
+.hoja__aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-espacio-2);
+  color: var(--cs-texto2);
+}

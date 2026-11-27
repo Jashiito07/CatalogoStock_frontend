@@ -1,37 +1,91 @@
 .inicio__encabezado {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: var(--cs-espacio-3);
+}
+
+.inicio__titulos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-1);
+  min-width: 0;
 }
 
 .inicio__logo {
-  --cs-logo-ancho: 10rem;
+  --cs-logo-ancho: 8rem;
+  margin-bottom: var(--cs-espacio-2);
 }
 
 .inicio__saludo {
-  margin: 0 0 0.25rem;
-  font-family: var(--cs-fuente-titulo);
-  font-size: var(--cs-texto-2xl);
-  color: var(--cs-pri-t);
+  overflow-wrap: anywhere;
 }
 
-.inicio__nombre {
+/* RNF-11: el texto de los avisos usa el color de texto del tema (4.5:1 sobre su fondo). */
+.inicio p-message {
+  --p-message-warn-color: var(--cs-texto);
+  --p-message-error-color: var(--cs-texto);
+}
+
+.inicio__circulos {
+  display: flex;
+  gap: var(--cs-espacio-3);
+  padding: var(--cs-espacio-2) var(--cs-espacio-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.inicio__marca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-3);
+}
+
+/* Carrusel con ajuste por tarjeta (scroll-snap); «Ver todo» es la alternativa sin gesto. */
+.inicio__carrusel {
+  display: flex;
+  gap: var(--cs-espacio-3);
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
+  padding: var(--cs-espacio-1) var(--cs-espacio-1) var(--cs-espacio-3);
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
 }
 
-.inicio__nombre + .cs-ayuda {
-  margin-bottom: 0.75rem;
+.inicio__item {
+  flex: none;
+  width: 10.5rem;
+  scroll-snap-align: start;
 }
 
-.inicio__etiqueta {
-  font-weight: 600;
+.inicio__carga {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-3);
 }
 
-.inicio__texto {
-  margin: 0;
-  line-height: 1.5;
+.inicio__esqueletos {
+  display: flex;
+  gap: var(--cs-espacio-3);
+  overflow: hidden;
+}
+
+.inicio__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cs-espacio-2);
+  padding: var(--cs-espacio-6) var(--cs-espacio-4);
+  text-align: center;
+
+  > i {
+    font-size: 2.5rem;
+    color: var(--cs-texto2);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: var(--cs-texto-lg);
+  }
 }

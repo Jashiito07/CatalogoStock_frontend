@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.chips {
+  display: flex;
+  gap: var(--cs-espacio-2);
+  padding: var(--cs-espacio-1) var(--cs-espacio-1) var(--cs-espacio-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip.p-button {
+  flex: none;
+  min-height: var(--cs-tactil-minimo);
+  white-space: nowrap;
+  transition: transform var(--cs-duracion-corta) var(--cs-curva);
+}
+
+/* Borde de control a ≥ 3:1 (--cs-ctl) y texto del color principal. */
+.chip.p-button.p-button-outlined {
+  color: var(--cs-texto);
+  border-color: var(--cs-ctl);
+}
+
+/* Chip activo: sube un poco (se apaga con «reducir movimiento»). */
+.chip--activo.p-button {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip--activo.p-button {
+    transform: none;
+  }
+}

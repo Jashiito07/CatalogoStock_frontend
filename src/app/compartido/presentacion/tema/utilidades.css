@@ -318,6 +318,62 @@
   box-shadow: var(--cs-sombra-alta);
 }
 
+/* Hoja de detalle de producto: alto según el contenido, con límite y desplazamiento. */
+.p-drawer.p-drawer-bottom.cs-hoja-producto {
+  height: auto;
+  max-height: 88dvh;
+  background: var(--cs-sup);
+  color: var(--cs-texto);
+}
+
+/* El botón de cerrar (✕) va a la derecha y mide al menos 48 px (RNF-10). */
+.cs-hoja-producto .p-drawer-header {
+  justify-content: flex-end;
+  padding-block-end: 0;
+}
+
+.cs-hoja-producto .p-drawer-close-button.p-button {
+  width: var(--cs-control-minimo);
+  height: var(--cs-control-minimo);
+  color: var(--cs-texto);
+  background: var(--cs-sup2);
+  border: 0;
+  border-radius: 50%;
+}
+
+.cs-hoja-producto .p-drawer-close-button.p-button:hover {
+  color: var(--cs-texto);
+  background: var(--cs-borde);
+}
+
+.cs-hoja-producto .p-drawer-close-button .p-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* p-tag usado como etiqueta de estado: las variables --cs-* sustituyen a su color. */
+.p-tag.cs-etiqueta {
+  font-weight: 700;
+  border-radius: var(--cs-radio-pildora);
+  background: var(--cs-info-bg);
+  color: var(--cs-info);
+}
+
+.p-tag.cs-etiqueta--ok {
+  background: var(--cs-ok-bg);
+  color: var(--cs-ok);
+}
+
+.p-tag.cs-etiqueta--warn {
+  background: var(--cs-warn-bg);
+  color: var(--cs-warn);
+}
+
+.p-tag.cs-etiqueta--mal {
+  background: var(--cs-mal-bg);
+  color: var(--cs-mal);
+}
+
 /* ---------- Movimiento ligero (solo CSS) ---------- */
 
 @keyframes cs-aparece {

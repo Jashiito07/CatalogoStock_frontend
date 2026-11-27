@@ -1,0 +1,120 @@
+<ion-content>
+  <main class="cs-pagina cuenta">
+    <header class="cuenta__encabezado">
+      <p class="cs-kicker">Tu perfil</p>
+      <h1 class="cs-titulo">Cuenta</h1>
+    </header>
+
+    @if (!enLinea()) {
+      <!-- D-10 / RN-07: sin conexión se usan los datos guardados, que no son definitivos. -->
+      <p-message severity="warn" icon="pi pi-wifi" role="status">
+        Sin conexión: estás usando los datos guardados en este dispositivo (no definitivos).
+      </p-message>
+    }
+
+    @if (usuario(); as datos) {
+      <section class="cuenta__perfil" aria-label="Perfil">
+        <p-avatar class="cuenta__avatar" shape="circle" [label]="iniciales()" aria-hidden="true" />
+        <div class="cuenta__identidad">
+          <p class="cuenta__nombre">{{ datos.nombre }}</p>
+          <p class="cs-ayuda cuenta__correo">{{ datos.correo }}</p>
+        </div>
+      </section>
+    }
+
+    @if (sinVerificar()) {
+      <!-- RF-USU-05 / D-50: aviso mientras el correo no esté verificado. -->
+      <app-verificar-correo [correo]="usuario()?.correo ?? ''" [enLinea]="enLinea()" />
+    }
+
+    <section class="cuenta__seccion" aria-labelledby="titulo-apariencia">
+      <h2 id="titulo-apariencia" class="cs-kicker">Apariencia</h2>
+      <div class="cs-tarjeta">
+        <span id="etiqueta-tema" class="cuenta__etiqueta">Tema</span>
+        <p-selectbutton
+          class="cuenta__tema"
+          [options]="opcionesTema"
+          optionLabel="etiqueta"
+          optionValue="valor"
+          [allowEmpty]="false"
+          ariaLabelledBy="etiqueta-tema"
+          [ngModel]="preferenciaTema()"
+          (ngModelChange)="elegirTema($event)"
+        >
+          <ng-template #item let-opcion>
+            <i [class]="opcion.icono" aria-hidden="true"></i>
+            <span>{{ opcion.etiqueta }}</span>
+          </ng-template>
+        </p-selectbutton>
+        <p class="cs-ayuda">
+          Automático: oscuro de 18:40 a 06:45 y claro el resto del día, según la hora de tu
+          teléfono.
+        </p>
+      </div>
+    </section>
+
+    @if (usuario(); as datos) {
+      <section class="cuenta__seccion" aria-labelledby="titulo-datos">
+        <h2 id="titulo-datos" class="cs-kicker">Datos</h2>
+        <dl class="cs-tarjeta cuenta__datos">
+          <div class="cuenta__dato">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            <div>
+              <dt>Nombre</dt>
+              <dd>{{ datos.nombre }}</dd>
+            </div>
+          </div>
+          <div class="cuenta__dato">
+            <i class="pi pi-envelope" aria-hidden="true"></i>
+            <div>
+              <dt>Correo</dt>
+              <dd>{{ datos.correo }}</dd>
+            </div>
+            @if (sinVerificar()) {
+              <app-etiqueta-estado texto="Sin verificar" icono="pi pi-exclamation-triangle" tipo="warn" />
+            } @else {
+              <app-etiqueta-estado texto="Verificado" icono="pi pi-check-circle" tipo="ok" />
+            }
+          </div>
+          @if (datos.telefono) {
+            <div class="cuenta__dato">
+              <i class="pi pi-phone" aria-hidden="true"></i>
+              <div>
+                <dt>Teléfono</dt>
+                <dd>{{ datos.telefono }}</dd>
+              </div>
+            </div>
+          }
+        </dl>
+      </section>
+    }
+
+    <div class="cs-acciones">
+      <!-- RF-USU-05: cambio de clave con la sesión iniciada. -->
+      <a pButton routerLink="/cambiar-clave" [rounded]="true" [outlined]="true" [fluid]="true">
+        <i class="pi pi-key" aria-hidden="true"></i>
+        Cambiar mi clave
+      </a>
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        [rounded]="true"
+        [outlined]="true"
+        [fluid]="true"
+        [loading]="cerrando()"
+        [disabled]="cerrando()"
+        (click)="confirmarCierre()"
+      >
+        <i class="pi pi-sign-out" aria-hidden="true"></i>
+        Cerrar sesión
+      </button>
+    </div>
+  </main>
+</ion-content>
+
+<ion-footer>
+  <app-barra-pestanas />
+</ion-footer>
+
+<p-confirmdialog />

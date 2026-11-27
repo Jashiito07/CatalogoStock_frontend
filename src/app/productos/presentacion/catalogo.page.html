@@ -1,18 +1,9 @@
 <ion-content>
   <main class="cs-pagina catalogo">
     <header class="catalogo__encabezado">
-      <a
-        pButton
-        routerLink="/inicio"
-        severity="secondary"
-        [text]="true"
-        aria-label="Volver al inicio"
-      >
-        <i class="pi pi-arrow-left" aria-hidden="true"></i>
-      </a>
-      <app-logo variante="horizontal" class="catalogo__logo" />
+      <p class="cs-kicker">{{ cabecera() ? 'Marca' : 'Todas las marcas' }}</p>
+      <h1 class="cs-titulo">Explorar</h1>
     </header>
-    <h1 class="cs-titulo">Catálogo</h1>
 
     <section class="catalogo__filtros" aria-label="Buscar y filtrar">
       <p-iconfield>
@@ -33,86 +24,39 @@
         />
       </p-iconfield>
 
-      @if (marcas().length > 0) {
-        <div class="catalogo__chips" role="group" aria-label="Filtrar por marca">
-          <button
-            pButton
-            type="button"
-            size="small"
-            class="chip"
-            [class.chip--activo]="marcaId() === null"
-            [outlined]="marcaId() !== null"
-            [attr.aria-pressed]="marcaId() === null"
-            (click)="elegirMarca(null)"
-          >
-            Todas
-          </button>
-          @for (marca of marcas(); track marca.id) {
-            <button
-              pButton
-              type="button"
-              size="small"
-              class="chip chip--marca"
-              [class.chip--activo]="marcaId() === marca.id"
-              [outlined]="marcaId() !== marca.id"
-              [style.--marca-fondo]="marca.color"
-              [style.--marca-texto]="
-                marcaId() === marca.id ? cabecera()?.texto : null
-              "
-              [style.--marca-acento]="marca.colorAcento"
-              [attr.aria-pressed]="marcaId() === marca.id"
-              (click)="elegirMarca(marca.id)"
-            >
-              <span class="chip__punto" aria-hidden="true"></span>
-              {{ marca.nombre }}
-            </button>
+      @if (vistaMarcas().length > 0) {
+        <div class="catalogo__circulos" role="group" aria-label="Filtrar por marca">
+          @for (marca of vistaMarcas(); track marca.id) {
+            <app-circulo-marca
+              [marca]="marca"
+              [activo]="marcaId() === marca.id"
+              (seleccionar)="elegirMarca(marca.id)"
+            />
           }
         </div>
       }
 
-      <p-select
-        inputId="catalogo-disponibilidad"
-        class="catalogo__disponibilidad"
-        [options]="opcionesDisponibilidad"
-        optionLabel="etiqueta"
-        optionValue="valor"
-        placeholder="Toda la disponibilidad"
-        ariaLabel="Filtrar por disponibilidad"
-        [showClear]="true"
-        [fluid]="true"
-        [ngModel]="disponibilidad()"
-        (ngModelChange)="elegirDisponibilidad($event)"
+      <app-chips-filtro
+        etiqueta="Filtrar por disponibilidad"
+        [opciones]="opcionesDisponibilidad"
+        [valor]="disponibilidad()"
+        (cambiar)="elegirDisponibilidadChip($event)"
       />
     </section>
 
     @if (cabecera(); as marca) {
-      <!-- RF-CAT-05 / D-43: cabecera de la marca con su color y su acento. -->
-      <section
-        class="marca-cabecera"
-        [class.marca-cabecera--acento]="marca.acento !== null"
-        [style.--marca-fondo]="marca.color"
-        [style.--marca-texto]="marca.texto"
-        [style.--marca-acento]="marca.acento"
-        [style.--marca-texto-acento]="marca.textoAcento"
-      >
-        <h2 class="marca-cabecera__nombre cs-nombre-marca">{{ marca.nombre }}</h2>
-        @if (estado() === 'listo') {
-          <span class="marca-cabecera__total">{{ resumen() }}</span>
-        }
-      </section>
+      <!-- RF-CAT-05 / D-43: banner de la marca con su color y su acento. -->
+      <app-banda-marca [marca]="marca" [detalle]="estado() === 'listo' ? resumen() : ''" />
     }
 
     @switch (estado()) {
       @case ('cargando') {
-        <div class="catalogo__lista" role="status" aria-label="Cargando productos">
+        <div class="catalogo__rejilla" role="status" aria-label="Cargando productos">
           @for (n of esqueletos; track n) {
             <div class="esqueleto">
-              <p-skeleton width="4.875rem" height="4.875rem" borderRadius="0.75rem" />
-              <div class="esqueleto__texto">
-                <p-skeleton width="80%" height="1rem" />
-                <p-skeleton width="35%" height="0.875rem" />
-                <p-skeleton width="55%" height="1.25rem" />
-              </div>
+              <p-skeleton width="100%" height="9rem" borderRadius="1rem" />
+              <p-skeleton width="80%" height="1rem" />
+              <p-skeleton width="45%" height="1.25rem" />
             </div>
           }
         </div>
@@ -122,7 +66,7 @@
         <p-message severity="warn" icon="pi pi-wifi" role="status">
           {{ mensajeSinConexion }}
         </p-message>
-        <button pButton type="button" id="catalogo-reintentar" (click)="reintentar()">
+        <button pButton type="button" id="catalogo-reintentar" [rounded]="true" (click)="reintentar()">
           <i class="pi pi-refresh" aria-hidden="true"></i>
           Reintentar
         </button>
@@ -131,7 +75,7 @@
         <p-message severity="error" icon="pi pi-exclamation-triangle" role="alert">
           No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.
         </p-message>
-        <button pButton type="button" id="catalogo-reintentar" (click)="reintentar()">
+        <button pButton type="button" id="catalogo-reintentar" [rounded]="true" (click)="reintentar()">
           <i class="pi pi-refresh" aria-hidden="true"></i>
           Reintentar
         </button>
@@ -150,7 +94,7 @@
               <i class="pi pi-search" aria-hidden="true"></i>
               <h2>No hay productos que coincidan</h2>
               <p class="cs-ayuda">Prueba con otra búsqueda u otra marca.</p>
-              <button pButton type="button" id="catalogo-limpiar" (click)="limpiarFiltros()">
+              <button pButton type="button" id="catalogo-limpiar" [rounded]="true" (click)="limpiarFiltros()">
                 <i class="pi pi-filter-slash" aria-hidden="true"></i>
                 Limpiar filtros
               </button>
@@ -164,27 +108,24 @@
           @if (!cabecera()) {
             <p class="catalogo__resumen cs-ayuda" role="status">{{ resumen() }}</p>
           }
-          <ul class="catalogo__lista" aria-label="Productos">
-            @for (producto of productos(); track producto.id) {
-              <li><app-fila-producto [producto]="producto" /></li>
+          <ul class="catalogo__rejilla" aria-label="Productos">
+            @for (producto of vistaProductos(); track producto.id) {
+              <li><app-tarjeta-producto [producto]="producto" (abrir)="abrirDetalle(producto)" /></li>
             }
           </ul>
 
           @if (cargandoMas()) {
-            <div class="catalogo__lista" role="status" aria-label="Cargando más productos">
+            <div class="catalogo__rejilla" role="status" aria-label="Cargando más productos">
               <div class="esqueleto">
-                <p-skeleton width="4.875rem" height="4.875rem" borderRadius="0.75rem" />
-                <div class="esqueleto__texto">
-                  <p-skeleton width="80%" height="1rem" />
-                  <p-skeleton width="55%" height="1.25rem" />
-                </div>
+                <p-skeleton width="100%" height="9rem" borderRadius="1rem" />
+                <p-skeleton width="80%" height="1rem" />
               </div>
             </div>
           } @else if (errorAlCargarMas()) {
             <p-message severity="error" icon="pi pi-exclamation-triangle" role="alert">
               No pudimos cargar más productos.
             </p-message>
-            <button pButton type="button" id="catalogo-reintentar-mas" (click)="cargarMas()">
+            <button pButton type="button" id="catalogo-reintentar-mas" [rounded]="true" (click)="cargarMas()">
               <i class="pi pi-refresh" aria-hidden="true"></i>
               Reintentar
             </button>
@@ -195,6 +136,7 @@
                 type="button"
                 id="catalogo-ver-mas"
                 severity="secondary"
+                [rounded]="true"
                 [outlined]="true"
                 (click)="cargarMas()"
               >
@@ -206,4 +148,10 @@
       }
     }
   </main>
+
+  <app-hoja-producto [producto]="seleccionado()" [(visible)]="hojaAbierta" />
 </ion-content>
+
+<ion-footer>
+  <app-barra-pestanas />
+</ion-footer>

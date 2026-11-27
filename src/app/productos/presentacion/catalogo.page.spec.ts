@@ -70,10 +70,10 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     });
   });
 
-  it('D-42: muestra una fila por producto con nombre, marca, precio en texto y disponibilidad', async () => {
+  it('D-41: muestra una tarjeta por producto con nombre, marca, precio en texto y disponibilidad', async () => {
     const { elemento } = await abrir();
 
-    const filas = elemento.querySelectorAll('app-fila-producto');
+    const filas = elemento.querySelectorAll('app-tarjeta-producto');
     expect(filas).toHaveLength(3);
     expect(filas[0].textContent).toContain('Crema hidratante');
     expect(filas[0].textContent).toContain('Yanbal');
@@ -86,25 +86,25 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
   it('RN-09 / RF-INV-03: los agotados y pendientes de reposición se muestran, no se ocultan', async () => {
     const { elemento } = await abrir();
 
-    const textos = Array.from(elemento.querySelectorAll('app-fila-producto')).map((f) => f.textContent);
+    const textos = Array.from(elemento.querySelectorAll('app-tarjeta-producto')).map((f) => f.textContent);
     expect(textos[1]).toContain('Agotado');
     expect(textos[1]).toContain('Labial mate rojo');
     expect(textos[2]).toContain('Pendiente de reposición');
-    expect(elemento.querySelector('.fila__estado--agotado')).not.toBeNull();
+    expect(elemento.querySelector('.cs-etiqueta--mal')).not.toBeNull();
   });
 
-  it('un producto sin imagen muestra el marcador (ícono) en lugar de la miniatura', async () => {
+  it('un producto sin imagen muestra el marcador (ícono) en lugar de la imagen', async () => {
     const { elemento } = await abrir();
 
-    const sinImagen = elemento.querySelectorAll('app-fila-producto')[1];
+    const sinImagen = elemento.querySelectorAll('app-tarjeta-producto')[1];
     expect(sinImagen.querySelector('img')).toBeNull();
-    expect(sinImagen.querySelector('p-avatar .pi-image')).not.toBeNull();
+    expect(sinImagen.querySelector('.pi-image')).not.toBeNull();
   });
 
   it('RF-CAT-05: la etiqueta de marca lleva su color y el texto calculado por el servidor', async () => {
     const { elemento } = await abrir();
 
-    const etiqueta = elemento.querySelectorAll<HTMLElement>('.fila__marca')[2];
+    const etiqueta = elemento.querySelectorAll<HTMLElement>('.tarjeta__marca')[2];
     expect(etiqueta.style.getPropertyValue('--marca-fondo')).toBe(AVON.color);
     expect(etiqueta.style.getPropertyValue('--marca-texto')).toBe(AVON.textoSobreColor);
   });
@@ -114,7 +114,7 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     const { elemento } = await abrir();
 
     expect(elemento.querySelectorAll('p-skeleton').length).toBeGreaterThan(0);
-    expect(elemento.querySelector('app-fila-producto')).toBeNull();
+    expect(elemento.querySelector('app-tarjeta-producto')).toBeNull();
   });
 
   it('estado vacío: «Aún no hay productos» cuando no hay filtros', async () => {
@@ -140,7 +140,7 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
       { marcaId: null, busqueda: '', disponibilidad: null },
       1,
     );
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(1);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(1);
   });
 
   it('RNF-06: sin conexión muestra el aviso del catálogo y «Reintentar» carga al volver la red', async () => {
@@ -159,7 +159,7 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     elemento.querySelector<HTMLButtonElement>('#catalogo-reintentar')?.click();
     await refrescar(fixture);
 
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(1);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(1);
     expect(elemento.textContent).not.toContain(MENSAJE_SIN_CONEXION);
   });
 
@@ -172,7 +172,7 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     conectividad.cambiar(true);
     await refrescar(fixture);
 
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(3);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(3);
   });
 
   it('error del servidor: mensaje claro con «Reintentar», sin detalles técnicos', async () => {
@@ -184,15 +184,15 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     elemento.querySelector<HTMLButtonElement>('#catalogo-reintentar')?.click();
     await refrescar(fixture);
 
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(3);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(3);
   });
 
   it('RF-CAT-05: filtrar por marca pide al servidor y muestra la cabecera con su color y su acento', async () => {
     const { fixture, elemento } = await abrir();
-    const chips = Array.from(elemento.querySelectorAll('.catalogo__chips button')).map((b) =>
-      b.textContent?.trim(),
+    const circulos = Array.from(elemento.querySelectorAll('.catalogo__circulos .circulo__nombre')).map(
+      (b) => b.textContent?.trim(),
     );
-    expect(chips).toEqual(['Todas', 'Yanbal', 'Avon', "L'Bel", 'Leonisa']);
+    expect(circulos).toEqual(['Yanbal', 'Avon', "L'Bel", 'Leonisa']);
 
     productos.mockResolvedValue(pagina([producto('p9', 'Bralette', '15.00', { marca: LEONISA })], 1));
     boton(elemento, 'Leonisa')?.click();
@@ -202,7 +202,7 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
       { marcaId: LEONISA.id, busqueda: '', disponibilidad: null },
       1,
     );
-    const cabecera = elemento.querySelector<HTMLElement>('.marca-cabecera');
+    const cabecera = elemento.querySelector<HTMLElement>('app-banda-marca section');
     expect(cabecera?.textContent).toContain('Leonisa');
     expect(cabecera?.textContent).toContain('1 producto');
     expect(cabecera?.style.getPropertyValue('--marca-fondo')).toBe('#222221');
@@ -211,9 +211,12 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     expect(cabecera?.style.getPropertyValue('--marca-texto-acento')).toBe('#1E293B');
     expect(boton(elemento, 'Leonisa')?.getAttribute('aria-pressed')).toBe('true');
 
-    boton(elemento, 'Todas')?.click();
+    // Tocar otra vez el círculo de la marca elegida la quita del filtro.
+    productos.mockResolvedValue(pagina([crema, labial, perfume]));
+    boton(elemento, 'Leonisa')?.click();
     await refrescar(fixture);
-    expect(elemento.querySelector('.marca-cabecera')).toBeNull();
+    expect(productos).toHaveBeenLastCalledWith({ marcaId: null, busqueda: '', disponibilidad: null }, 1);
+    expect(elemento.querySelector('app-banda-marca')).toBeNull();
   });
 
   it('RF-CAT-03: la búsqueda espera a que el Cliente deje de escribir', async () => {
@@ -263,14 +266,14 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     const segunda = [producto('b0', 'Producto 20', '2.00')];
     productos.mockResolvedValueOnce(pagina(primera, 21, 1));
     const { fixture, elemento } = await abrir();
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(20);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(20);
 
     productos.mockResolvedValueOnce(pagina(segunda, 21, 2));
     elemento.querySelector<HTMLButtonElement>('#catalogo-ver-mas')?.click();
     await refrescar(fixture);
 
     expect(productos).toHaveBeenLastCalledWith({ marcaId: null, busqueda: '', disponibilidad: null }, 2);
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(21);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(21);
     expect(elemento.querySelector('#catalogo-ver-mas')).toBeNull();
   });
 
@@ -282,22 +285,64 @@ describe('CatalogoPage (RF-CAT-03, RF-CAT-05, D-42)', { timeout: 30000 }, () => 
     elemento.querySelector<HTMLButtonElement>('#catalogo-ver-mas')?.click();
     await refrescar(fixture);
 
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(2);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(2);
     expect(elemento.textContent).toContain('no definitivos');
     expect(elemento.textContent).toContain('No pudimos cargar más productos');
 
     productos.mockResolvedValueOnce(pagina([perfume], 5, 2));
     elemento.querySelector<HTMLButtonElement>('#catalogo-reintentar-mas')?.click();
     await refrescar(fixture);
-    expect(elemento.querySelectorAll('app-fila-producto')).toHaveLength(3);
+    expect(elemento.querySelectorAll('app-tarjeta-producto')).toHaveLength(3);
   });
 
-  it('el botón de volver lleva al inicio y los controles táctiles son botones de PrimeNG', async () => {
+  it('los controles son de PrimeNG: búsqueda, chips de disponibilidad y barra inferior con Explorar activo', async () => {
     const { elemento } = await abrir();
 
-    expect(elemento.querySelector('a[aria-label="Volver al inicio"]')?.getAttribute('href')).toBe('/inicio');
-    expect(elemento.querySelector('p-select')).not.toBeNull();
     expect(elemento.querySelector('p-iconfield input.p-inputtext')).not.toBeNull();
+    const chips = Array.from(elemento.querySelectorAll('app-chips-filtro button.p-button')).map((b) =>
+      b.textContent?.trim(),
+    );
+    expect(chips).toEqual(['Todo', 'Disponible', 'Agotado', 'Pendiente de reposición']);
+    expect(elemento.querySelector('app-chips-filtro button[aria-pressed="true"]')?.textContent).toContain('Todo');
+    expect(elemento.querySelectorAll('app-barra-pestanas .barra__pestana')).toHaveLength(5);
     expect(YANBAL.nombre).toBe('Yanbal');
+  });
+
+  it('el chip de disponibilidad pide al servidor solo esa disponibilidad', async () => {
+    const { fixture, elemento } = await abrir();
+    productos.mockResolvedValue(pagina([labial]));
+
+    const chip = Array.from(elemento.querySelectorAll<HTMLButtonElement>('app-chips-filtro button')).find(
+      (b) => b.textContent?.includes('Agotado'),
+    );
+    chip?.click();
+    await refrescar(fixture);
+
+    expect(productos).toHaveBeenLastCalledWith(
+      { marcaId: null, busqueda: '', disponibilidad: 'AGOTADO' },
+      1,
+    );
+  });
+
+  it('tocar una tarjeta abre el detalle en una hoja inferior con foto, precio y disponibilidad', async () => {
+    const { fixture, elemento } = await abrir();
+
+    elemento.querySelector<HTMLButtonElement>('app-tarjeta-producto button')?.click();
+    await refrescar(fixture);
+
+    const hoja = document.body.querySelector('.cs-hoja-producto');
+    expect(hoja?.textContent).toContain('Crema hidratante');
+    expect(hoja?.textContent).toContain('$12.50');
+    expect(hoja?.textContent).toContain('Disponible');
+    expect(hoja?.querySelector('img')?.getAttribute('src')).toBe('http://api/i/1.jpg');
+    expect(hoja?.querySelector<HTMLButtonElement>('.hoja__agregar')?.disabled).toBe(true);
+  });
+
+  it('una agotada se muestra con la imagen atenuada y la etiqueta «Agotado» con ícono', async () => {
+    const { elemento } = await abrir();
+
+    const tarjeta = elemento.querySelectorAll('app-tarjeta-producto')[1];
+    expect(tarjeta?.querySelector('.tarjeta__imagen--atenuada')).not.toBeNull();
+    expect(tarjeta?.querySelector('.cs-etiqueta--mal .pi-ban')).not.toBeNull();
   });
 });

@@ -1,0 +1,61 @@
+:host {
+  display: inline-block;
+  flex: none;
+}
+
+.circulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cs-espacio-2);
+  min-width: 4.5rem;
+  min-height: var(--cs-control-minimo);
+  padding: var(--cs-espacio-1);
+  font: inherit;
+  color: var(--cs-texto);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.circulo:focus-visible {
+  outline: 3px solid var(--cs-pri-t);
+  outline-offset: 2px;
+  border-radius: var(--cs-radio-control);
+}
+
+.circulo__avatar {
+  --p-avatar-width: 4rem;
+  --p-avatar-height: 4rem;
+  --p-avatar-background: var(--marca-fondo);
+  --p-avatar-color: var(--marca-texto);
+  font-family: var(--cs-fuente-titulo);
+  font-size: var(--cs-texto-xl);
+  font-weight: 700;
+  /* Anillo con el acento de la marca (o su color) y un filete que evita perder los fondos casi negros. */
+  box-shadow:
+    0 0 0 2px var(--cs-fondo),
+    0 0 0 4px var(--marca-acento, var(--marca-fondo)),
+    0 0 0 5px var(--cs-borde-marca);
+  transition: transform var(--cs-duracion-corta) var(--cs-curva);
+}
+
+.circulo__nombre {
+  max-width: 5rem;
+  overflow: hidden;
+  font-size: var(--cs-texto-xs);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Marca elegida: el círculo crece y el nombre se subraya (no depende solo del color). */
+.circulo--activo .circulo__avatar {
+  transform: scale(1.1);
+}
+
+.circulo--activo .circulo__nombre {
+  color: var(--cs-pri-t);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}

@@ -1,0 +1,55 @@
+<p-drawer
+  position="bottom"
+  appendTo="body"
+  styleClass="cs-hoja-producto"
+  ariaCloseLabel="Cerrar detalle"
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [modal]="true"
+  [dismissible]="true"
+  [closeOnEscape]="true"
+  [showCloseIcon]="true"
+  [blockScroll]="true"
+>
+  <ng-template #header>
+    <span class="hoja__titulo-oculto">Detalle del producto</span>
+  </ng-template>
+
+  @if (producto(); as p) {
+    <article class="hoja">
+      <div class="hoja__imagen" [class.hoja__imagen--atenuada]="p.atenuado">
+        @if (imagenVisible(); as url) {
+          <img [src]="url" alt="" loading="lazy" decoding="async" (error)="alFallarImagen()" />
+        } @else {
+          <span class="hoja__marcador" aria-hidden="true"><i class="pi pi-image"></i></span>
+        }
+      </div>
+
+      <span
+        class="cs-marca-etiqueta"
+        [style.--marca-fondo]="p.marca.color"
+        [style.--marca-texto]="p.marca.texto"
+        >{{ p.marca.nombre }}</span
+      >
+      <h2 class="hoja__nombre cs-titulo-serif">{{ p.nombre }}</h2>
+
+      <div class="hoja__precio-fila">
+        <span class="hoja__precio cs-cifra">{{ p.precio }}</span>
+        <app-etiqueta-estado [texto]="p.estado.texto" [icono]="p.estado.icono" [tipo]="p.estado.tipo" />
+      </div>
+
+      @if (p.descripcion) {
+        <p class="hoja__descripcion">{{ p.descripcion }}</p>
+      }
+
+      <button pButton type="button" class="hoja__agregar" [rounded]="true" [fluid]="true" [disabled]="true">
+        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+        Agregar al carrito
+      </button>
+      <p class="hoja__aviso cs-ayuda">
+        <i class="pi pi-clock" aria-hidden="true"></i>
+        Próximamente: el carrito llegará en una próxima versión.
+      </p>
+    </article>
+  }
+</p-drawer>

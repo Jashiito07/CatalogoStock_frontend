@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.banda {
+  min-height: 8rem;
+  padding: var(--cs-espacio-5);
+}
+
+.banda__texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cs-espacio-2);
+}
+
+.banda__detalle {
+  margin: 0;
+  font-size: var(--cs-texto-sm);
+  font-weight: 700;
+}
+
+.banda__nombre {
+  margin: 0;
+  font-size: var(--cs-texto-3xl);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * «Ver todo»: con acento (Leonisa) usa el acento y su texto; sin él, invierte la banda
+ * (texto de la marca como fondo y color de la marca como texto): ambos pares cumplen 4.5:1.
+ */
+.banda__boton.p-button {
+  --btn-fondo: var(--marca-acento, var(--marca-texto));
+  --btn-texto: var(--marca-texto-acento, var(--marca-fondo));
+  background: var(--btn-fondo);
+  border-color: var(--btn-fondo);
+  color: var(--btn-texto);
+}
+
+.banda__boton.p-button:not(:disabled):hover,
+.banda__boton.p-button:not(:disabled):focus-visible {
+  background: var(--btn-fondo);
+  border-color: var(--btn-fondo);
+  color: var(--btn-texto);
+  filter: brightness(1.08);
+}
+
+.banda__boton.p-button:focus-visible {
+  outline: 3px solid var(--marca-texto);
+  outline-offset: 2px;
+}

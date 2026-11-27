@@ -1,0 +1,37 @@
+<button
+  type="button"
+  class="tarjeta cs-tarjeta cs-tarjeta--pulsable"
+  [attr.aria-label]="'Ver detalle de ' + producto().nombre"
+  (click)="abrir.emit()"
+>
+  <span class="tarjeta__imagen" [class.tarjeta__imagen--atenuada]="producto().atenuado">
+    @if (imagenVisible(); as url) {
+      <img
+        class="cs-imagen-producto"
+        [src]="url"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        (error)="alFallarImagen()"
+      />
+    } @else {
+      <span class="tarjeta__marcador cs-imagen-producto" aria-hidden="true">
+        <i class="pi pi-image"></i>
+      </span>
+    }
+  </span>
+  <span class="tarjeta__marca cs-marca-etiqueta"
+    [style.--marca-fondo]="producto().marca.color"
+    [style.--marca-texto]="producto().marca.texto"
+    >{{ producto().marca.nombre }}</span
+  >
+  <span class="tarjeta__nombre">{{ producto().nombre }}</span>
+  <span class="tarjeta__pie">
+    <span class="tarjeta__precio cs-cifra">{{ producto().precio }}</span>
+    <app-etiqueta-estado
+      [texto]="producto().estado.texto"
+      [icono]="producto().estado.icono"
+      [tipo]="producto().estado.tipo"
+    />
+  </span>
+</button>

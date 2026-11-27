@@ -1,0 +1,21 @@
+<nav class="barra" aria-label="Navegación principal">
+  @for (pestana of pestanas; track pestana.etiqueta) {
+    @if (pestana.ruta; as ruta) {
+      <a
+        class="barra__pestana cs-pulsable"
+        [routerLink]="ruta"
+        routerLinkActive="barra__pestana--activa"
+        ariaCurrentWhenActive="page"
+      >
+        <i [class]="pestana.icono" aria-hidden="true"></i>
+        <span class="barra__etiqueta">{{ pestana.etiqueta }}</span>
+      </a>
+    } @else {
+      <button type="button" class="barra__pestana barra__pestana--pronto" disabled>
+        <i [class]="pestana.icono" aria-hidden="true"></i>
+        <span class="barra__etiqueta">{{ pestana.etiqueta }}</span>
+        <span class="barra__pronto">Próximamente</span>
+      </button>
+    }
+  }
+</nav>

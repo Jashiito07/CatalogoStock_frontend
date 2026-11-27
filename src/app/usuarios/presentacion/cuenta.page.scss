@@ -1,0 +1,97 @@
+.cuenta__encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-1);
+}
+
+/* RNF-11: el texto de los avisos usa el color de texto del tema (4.5:1 sobre su fondo). */
+.cuenta p-message {
+  --p-message-warn-color: var(--cs-texto);
+}
+
+.cuenta__perfil {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-espacio-4);
+}
+
+.cuenta__avatar {
+  --p-avatar-width: 4rem;
+  --p-avatar-height: 4rem;
+  --p-avatar-background: var(--cs-sec);
+  --p-avatar-color: var(--cs-sobre-sec);
+  flex: none;
+  font-size: var(--cs-texto-xl);
+  font-weight: 700;
+}
+
+.cuenta__identidad {
+  min-width: 0;
+}
+
+.cuenta__nombre {
+  margin: 0;
+  font-family: var(--cs-fuente-titulo);
+  font-size: var(--cs-texto-xl);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.cuenta__correo {
+  overflow-wrap: anywhere;
+}
+
+.cuenta__seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-espacio-2);
+}
+
+.cuenta__etiqueta {
+  font-weight: 700;
+}
+
+/* Las tres opciones del tema ocupan el ancho por igual (píldora segmentada). */
+.cuenta__tema {
+  display: block;
+}
+
+:host ::ng-deep .cuenta__tema .p-selectbutton {
+  display: flex;
+  width: 100%;
+}
+
+:host ::ng-deep .cuenta__tema .p-togglebutton {
+  flex: 1;
+  gap: var(--cs-espacio-2);
+}
+
+.cuenta__datos {
+  margin: 0;
+}
+
+.cuenta__dato {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-espacio-3);
+
+  > .pi {
+    color: var(--cs-pri-t);
+  }
+
+  > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  dt {
+    font-size: var(--cs-texto-sm);
+    color: var(--cs-texto2);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+}
