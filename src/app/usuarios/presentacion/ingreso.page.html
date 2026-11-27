@@ -1,6 +1,10 @@
 <ion-content>
-  <main class="cs-pagina">
-    <header class="cs-encabezado-marca">
+  <main class="cs-pagina cs-acceso">
+    <header class="cs-acceso__cabecera">
+      <a pButton routerLink="/bienvenida" class="cs-acceso__volver" severity="secondary" [text]="true">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        Volver
+      </a>
       <app-logo variante="icono" />
       <h1 class="cs-titulo">Iniciar sesión</h1>
       <p class="cs-ayuda">Ingresa con el correo y la clave de tu cuenta.</p>
@@ -91,7 +95,7 @@
         }
 
         <div class="cs-acciones">
-          <button pButton type="submit" [fluid]="true" [loading]="enviando()" [disabled]="enviando()">
+          <button pButton type="submit" [rounded]="true" [fluid]="true" [loading]="enviando()" [disabled]="enviando()">
             <i class="pi pi-sign-in" aria-hidden="true"></i>
             Iniciar sesión
           </button>

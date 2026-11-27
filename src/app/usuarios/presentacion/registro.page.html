@@ -1,6 +1,10 @@
 <ion-content>
-  <main class="cs-pagina">
-    <header class="cs-encabezado-marca">
+  <main class="cs-pagina cs-acceso">
+    <header class="cs-acceso__cabecera">
+      <a pButton routerLink="/bienvenida" class="cs-acceso__volver" severity="secondary" [text]="true">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        Volver
+      </a>
       <app-logo variante="icono" />
       <h1 class="cs-titulo">Crear cuenta</h1>
       <p class="cs-ayuda">Completa tus datos para comprar por catálogo.</p>
@@ -166,6 +170,7 @@
           <button
             pButton
             type="submit"
+            [rounded]="true"
             [fluid]="true"
             [loading]="enviando()"
             [disabled]="enviando() || estadoAviso().tipo !== 'listo'"
