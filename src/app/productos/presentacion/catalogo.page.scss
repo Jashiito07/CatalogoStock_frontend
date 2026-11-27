@@ -1,16 +1,7 @@
 .catalogo__encabezado {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-inline-start: -0.5rem;
-}
-
-.catalogo__logo {
-  --cs-logo-ancho: 9rem;
-}
-
-.catalogo .cs-titulo {
-  margin-top: -0.5rem;
+  flex-direction: column;
+  gap: var(--cs-espacio-1);
 }
 
 /* RNF-11: el texto de los avisos usa el color de texto corporativo (4.5:1 sobre su fondo). */
@@ -22,97 +13,27 @@
 .catalogo__filtros {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--cs-espacio-3);
 }
 
-/* Chips de marca: desplazamiento horizontal con controles de 48 px (RNF-10). */
-.catalogo__chips {
+/* Círculos de marca: fila con desplazamiento horizontal. */
+.catalogo__circulos {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--cs-espacio-3);
+  padding: var(--cs-espacio-2) var(--cs-espacio-1);
   overflow-x: auto;
-  padding-bottom: 0.25rem;
   scrollbar-width: none;
-}
-
-.chip {
-  flex: none;
-  white-space: nowrap;
-  border-radius: var(--cs-radio-pildora);
-  min-height: var(--cs-control-minimo);
-  transition: transform var(--cs-duracion-corta) var(--cs-curva);
-}
-
-/* Chip activo: sube un poco (microinteracción; se apaga con «reducir movimiento»). */
-.chip.chip--activo {
-  transform: translateY(-2px);
-}
-
-.chip__punto {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: var(--marca-fondo);
-  box-shadow: 0 0 0 1px var(--cs-borde-marca);
-}
-
-/* Marca elegida (RF-CAT-05, D-43): fondo de la marca y texto calculado por el servidor. */
-.chip--marca.chip--activo {
-  background: var(--marca-fondo);
-  border-color: var(--marca-acento, var(--marca-fondo));
-  color: var(--marca-texto);
-  box-shadow: 0 0 0 1px var(--cs-borde-marca);
-}
-
-.chip--marca.chip--activo:hover,
-.chip--marca.chip--activo:focus-visible {
-  background: var(--marca-fondo);
-  color: var(--marca-texto);
-}
-
-.chip--marca.chip--activo .chip__punto {
-  display: none;
-}
-
-/* Cabecera de la marca: su color de fondo y, si tiene, una franja con su acento (D-43). */
-.marca-cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: var(--cs-espacio-4) var(--cs-espacio-5);
-  border-radius: var(--cs-radio-tarjeta);
-  background: var(--marca-fondo);
-  color: var(--marca-texto);
-  box-shadow: 0 0 0 1px var(--cs-borde-marca);
-}
-
-.marca-cabecera--acento {
-  border-bottom: 0.375rem solid var(--marca-acento);
-}
-
-.marca-cabecera__nombre {
-  margin: 0;
-  font-size: var(--cs-texto-xl);
-}
-
-.marca-cabecera__total {
-  padding: 0.125rem 0.625rem;
-  border-radius: var(--cs-radio-pildora);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  background: var(--marca-acento, transparent);
-  color: var(--marca-texto-acento, var(--marca-texto));
-  border: 1px solid var(--marca-texto-acento, var(--marca-texto));
 }
 
 .catalogo__resumen {
   margin: 0;
 }
 
-.catalogo__lista {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* Rejilla de dos columnas de tarjetas. */
+.catalogo__rejilla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-espacio-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -120,19 +41,12 @@
 
 .esqueleto {
   display: flex;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  flex-direction: column;
+  gap: var(--cs-espacio-2);
+  padding: var(--cs-espacio-2);
   background: var(--cs-sup);
   border: 1px solid var(--cs-borde);
   border-radius: var(--cs-radio-tarjeta);
-}
-
-.esqueleto__texto {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.375rem;
 }
 
 .catalogo__centinela {

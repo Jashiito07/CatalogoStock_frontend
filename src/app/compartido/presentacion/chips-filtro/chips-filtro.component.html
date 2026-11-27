@@ -1,0 +1,19 @@
+<div class="chips" role="group" [attr.aria-label]="etiqueta()">
+  @for (opcion of opciones(); track opcion.valor) {
+    <button
+      pButton
+      type="button"
+      class="chip"
+      [rounded]="true"
+      [outlined]="valor() !== opcion.valor"
+      [class.chip--activo]="valor() === opcion.valor"
+      [attr.aria-pressed]="valor() === opcion.valor"
+      (click)="cambiar.emit(opcion.valor)"
+    >
+      @if (opcion.icono) {
+        <i [class]="opcion.icono" aria-hidden="true"></i>
+      }
+      {{ opcion.etiqueta }}
+    </button>
+  }
+</div>

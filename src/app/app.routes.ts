@@ -61,5 +61,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./productos/presentacion/catalogo.page').then((m) => m.CatalogoPage),
   },
+  {
+    // RF-USU-05, N2: perfil, verificación de correo, tema y cierre de sesión.
+    path: 'cuenta',
+    title: 'Cuenta · CatálogoStock',
+    canActivate: [conSesionGuard],
+    loadComponent: () => import('./usuarios/presentacion/cuenta.page').then((m) => m.CuentaPage),
+  },
   { path: '**', redirectTo: 'inicio' },
 ];

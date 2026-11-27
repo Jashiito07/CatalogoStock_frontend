@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+.barra {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--cs-espacio-1);
+  padding: var(--cs-espacio-2) var(--cs-espacio-2) calc(var(--cs-espacio-2) + env(safe-area-inset-bottom));
+  background: var(--cs-sup);
+  border-top: 1px solid var(--cs-borde);
+  border-radius: var(--cs-radio-tarjeta) var(--cs-radio-tarjeta) 0 0;
+  box-shadow: var(--cs-sombra-alta);
+}
+
+.barra__pestana {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-height: 3.5rem;
+  padding: var(--cs-espacio-1);
+  font: inherit;
+  color: var(--cs-texto2);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: var(--cs-radio-tarjeta);
+  cursor: pointer;
+
+  > .pi {
+    font-size: 1.25rem;
+  }
+}
+
+.barra__etiqueta {
+  font-size: var(--cs-texto-xs);
+  font-weight: 600;
+}
+
+/* Pestaña activa: fondo y texto del color principal; el texto sigue siendo legible (≥ 4.5:1). */
+.barra__pestana--activa {
+  color: var(--cs-pri-t);
+  background: var(--cs-sup2);
+}
+
+.barra__pestana--activa .barra__etiqueta {
+  font-weight: 700;
+}
+
+.barra__pestana:focus-visible {
+  outline: 3px solid var(--cs-pri-t);
+  outline-offset: -3px;
+}
+
+.barra__pestana--pronto {
+  cursor: not-allowed;
+}
+
+.barra__pronto {
+  font-size: 0.625rem;
+  line-height: 1;
+}

@@ -1,19 +1,21 @@
 <ion-content>
-  <main class="cs-pagina">
+  <main class="cs-pagina inicio">
     <header class="inicio__encabezado">
-      <app-logo variante="horizontal" class="inicio__logo" />
-      <button
+      <div class="inicio__titulos">
+        <app-logo variante="horizontal" class="inicio__logo" />
+        <p class="cs-kicker">Catálogo de marcas</p>
+        <h1 class="cs-titulo inicio__saludo">{{ saludo() }}</h1>
+      </div>
+      <a
         pButton
-        type="button"
+        routerLink="/catalogo"
         severity="secondary"
+        [rounded]="true"
         [outlined]="true"
-        [loading]="cerrando()"
-        [disabled]="cerrando()"
-        (click)="confirmarCierre()"
+        aria-label="Buscar productos"
       >
-        <i class="pi pi-sign-out" aria-hidden="true"></i>
-        Cerrar sesión
-      </button>
+        <i class="pi pi-search" aria-hidden="true"></i>
+      </a>
     </header>
 
     @if (!enLinea()) {
@@ -23,59 +25,90 @@
       </p-message>
     }
 
-    <p-card>
-      <h1 class="inicio__saludo">{{ saludo() }}</h1>
-      @if (usuario(); as datos) {
-        <p class="inicio__nombre">{{ datos.nombre }}</p>
-        <p class="cs-ayuda">{{ datos.correo }}</p>
-        <p-tag value="Cliente" severity="secondary" />
-      }
-      <ng-template #footer>
-        <!-- RF-USU-05: cambio de clave con la sesión iniciada. -->
-        <a pButton routerLink="/cambiar-clave" severity="secondary" [outlined]="true" [fluid]="true">
-          <i class="pi pi-key" aria-hidden="true"></i>
-          Cambiar mi clave
-        </a>
-      </ng-template>
-    </p-card>
-
-    @if (sinVerificar()) {
-      <!-- RF-USU-05 / D-50: aviso mientras el correo no esté verificado. -->
-      <app-verificar-correo [correo]="usuario()?.correo ?? ''" [enLinea]="enLinea()" />
+    @if (marcas().length > 0) {
+      <div class="inicio__circulos" role="group" aria-label="Marcas">
+        @for (marca of marcas(); track marca.id) {
+          <app-circulo-marca [marca]="marca" (seleccionar)="verMarca(marca)" />
+        }
+      </div>
     }
 
-    <p-card header="Apariencia">
-      <div class="cs-campo">
-        <span id="etiqueta-tema" class="inicio__etiqueta">Tema</span>
-        <p-selectbutton
-          [options]="opcionesTema"
-          optionLabel="etiqueta"
-          optionValue="valor"
-          [allowEmpty]="false"
-          ariaLabelledBy="etiqueta-tema"
-          [ngModel]="preferenciaTema()"
-          (ngModelChange)="elegirTema($event)"
-        />
-        <p class="cs-ayuda">
-          Automático: oscuro de 18:40 a 06:45 y claro el resto del día, según la hora de tu
-          teléfono.
-        </p>
-      </div>
-    </p-card>
+    <app-chips-filtro
+      etiqueta="Filtrar por disponibilidad"
+      [opciones]="opcionesDisponibilidad"
+      [valor]="disponibilidad()"
+      (cambiar)="elegirDisponibilidad($event)"
+    />
 
-    <p-card header="Catálogo">
-      <p class="inicio__texto">
-        Explora los productos de Yanbal, Avon, L'Bel y otras marcas.
-      </p>
-      <ng-template #footer>
-        <!-- RF-CAT-03: por ahora el catálogo se ve en línea; sin conexión llega en la Fase 4. -->
-        <a pButton routerLink="/catalogo" [fluid]="true">
-          <i class="pi pi-book" aria-hidden="true"></i>
-          Ver catálogo
-        </a>
-      </ng-template>
-    </p-card>
+    @switch (estado()) {
+      @case ('cargando') {
+        <div class="inicio__carga" role="status" aria-label="Cargando el catálogo">
+          <p-skeleton width="100%" height="8rem" borderRadius="1.5rem" />
+          <div class="inicio__esqueletos">
+            @for (n of esqueletos; track n) {
+              <p-skeleton width="10.5rem" height="14rem" borderRadius="1.5rem" />
+            }
+          </div>
+        </div>
+      }
+      @case ('sinConexion') {
+        <!-- RNF-06: el catálogo descargado llega en la Fase 4; por ahora se pide conexión. -->
+        <p-message severity="warn" icon="pi pi-wifi" role="status">
+          Necesitas conexión para ver el catálogo; pronto estará disponible sin conexión.
+        </p-message>
+        <button pButton type="button" id="inicio-reintentar" [rounded]="true" (click)="cargar()">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          Reintentar
+        </button>
+      }
+      @case ('error') {
+        <p-message severity="error" icon="pi pi-exclamation-triangle" role="alert">
+          No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.
+        </p-message>
+        <button pButton type="button" id="inicio-reintentar" [rounded]="true" (click)="cargar()">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          Reintentar
+        </button>
+      }
+      @case ('listo') {
+        @if (bloques().length === 0) {
+          <section class="inicio__vacio" role="status">
+            <i class="pi pi-box" aria-hidden="true"></i>
+            <h2>{{ disponibilidad() ? 'No hay productos con esa disponibilidad' : 'Aún no hay productos' }}</h2>
+            <p class="cs-ayuda">
+              {{
+                disponibilidad()
+                  ? 'Prueba con otra opción de disponibilidad.'
+                  : 'Cuando el vendedor publique productos, los verás aquí.'
+              }}
+            </p>
+          </section>
+        } @else {
+          @for (bloque of bloques(); track bloque.marca.id) {
+            <section class="inicio__marca" [attr.aria-label]="'Productos de ' + bloque.marca.nombre">
+              <app-banda-marca
+                [marca]="bloque.marca"
+                [detalle]="totalEnTexto(bloque.total)"
+                [conVerTodo]="true"
+                (verTodo)="verMarca(bloque.marca)"
+              />
+              <ul class="inicio__carrusel" [attr.aria-label]="'Carrusel de ' + bloque.marca.nombre">
+                @for (producto of bloque.productos; track producto.id) {
+                  <li class="inicio__item">
+                    <app-tarjeta-producto [producto]="producto" (abrir)="abrirDetalle(producto)" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+      }
+    }
   </main>
+
+  <app-hoja-producto [producto]="seleccionado()" [(visible)]="hojaAbierta" />
 </ion-content>
 
-<p-confirmdialog />
+<ion-footer>
+  <app-barra-pestanas />
+</ion-footer>

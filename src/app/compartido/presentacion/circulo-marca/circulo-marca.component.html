@@ -1,0 +1,14 @@
+<button
+  type="button"
+  class="circulo cs-pulsable"
+  [class.circulo--activo]="activo()"
+  [attr.aria-pressed]="activo()"
+  [attr.aria-label]="'Marca ' + marca().nombre"
+  [style.--marca-fondo]="marca().color"
+  [style.--marca-texto]="marca().texto"
+  [style.--marca-acento]="marca().acento"
+  (click)="seleccionar.emit()"
+>
+  <p-avatar class="circulo__avatar" shape="circle" [label]="iniciales()" aria-hidden="true" />
+  <span class="circulo__nombre">{{ marca().nombre }}</span>
+</button>

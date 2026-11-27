@@ -7,147 +7,190 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonContent } from '@ionic/angular';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { IonContent, IonFooter } from '@ionic/angular';
 import { ButtonDirective } from 'primeng/button';
-import { Card } from 'primeng/card';
-import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Message } from 'primeng/message';
-import { SelectButton } from 'primeng/selectbutton';
-import { Tag } from 'primeng/tag';
+import { Skeleton } from 'primeng/skeleton';
 
 import { CONECTIVIDAD } from '../../compartido/compartido.providers';
-import { PreferenciaTema } from '../../compartido/dominio/tema';
-import { ServicioTema } from '../../compartido/presentacion/tema/servicio-tema';
+import { ErrorSinConexion } from '../../compartido/dominio/error-api';
+import { BandaMarcaComponent } from '../../compartido/presentacion/banda-marca/banda-marca.component';
+import { BarraPestanasComponent } from '../../compartido/presentacion/barra-pestanas/barra-pestanas.component';
+import { ChipsFiltroComponent } from '../../compartido/presentacion/chips-filtro/chips-filtro.component';
+import { CirculoMarcaComponent } from '../../compartido/presentacion/circulo-marca/circulo-marca.component';
+import { HojaProductoComponent } from '../../compartido/presentacion/hoja-producto/hoja-producto.component';
 import { LogoComponent } from '../../compartido/presentacion/logo/logo.component';
-import { ActualizarUsuarioActual } from '../../usuarios/aplicacion/casos-uso/actualizar-usuario-actual.caso-uso';
-import { CerrarSesion } from '../../usuarios/aplicacion/casos-uso/cerrar-sesion.caso-uso';
+import { TarjetaProductoComponent } from '../../compartido/presentacion/tarjeta-producto/tarjeta-producto.component';
+import { VistaMarca, VistaProducto } from '../../compartido/presentacion/vistas';
+import { ConsultarMarcas } from '../../productos/aplicacion/casos-uso/consultar-marcas.caso-uso';
+import { ConsultarProductos } from '../../productos/aplicacion/casos-uso/consultar-productos.caso-uso';
+import { SIN_FILTROS } from '../../productos/dominio/consulta';
+import { Disponibilidad, esDisponibilidad } from '../../productos/dominio/producto';
+import {
+  aVistaMarca,
+  aVistaProducto,
+  OPCIONES_DISPONIBILIDAD,
+} from '../../productos/presentacion/vista-producto';
 import { GestorSesion } from '../../usuarios/aplicacion/gestor-sesion';
-import { correoVerificado, primerNombre, Usuario } from '../../usuarios/dominio/sesion';
-import { VerificarCorreoComponent } from '../../usuarios/presentacion/verificar-correo.component';
+import { primerNombre, Usuario } from '../../usuarios/dominio/sesion';
+
+type Estado = 'cargando' | 'listo' | 'error' | 'sinConexion';
+
+/** Cuántas tarjetas se ven en el carrusel de cada marca; «Ver todo» lleva a la lista completa. */
+export const PRODUCTOS_POR_CARRUSEL = 10;
+
+/** Una marca con su total y sus primeros productos (datos del servidor, RN-07). */
+interface BloqueMarca {
+  readonly marca: VistaMarca;
+  readonly total: number;
+  readonly productos: readonly VistaProducto[];
+}
 
 /**
- * Inicio del Cliente (PLAN 1.6): saludo, nombre, «Cambiar mi clave» (RF-USU-05) y cerrar
- * sesión. Será la entrada al
- * catálogo en F2 y F4. Funciona sin conexión con la sesión guardada (D-10) y, al
- * recuperar la conexión, refresca los datos y renueva la sesión si hace falta.
+ * Inicio del Cliente (rediseño, etapa 3): saludo, círculos de marca, chips de
+ * disponibilidad y, por cada marca, su banner con un carrusel de productos. El detalle se
+ * abre en una hoja inferior. Solo muestra datos reales del catálogo; sin conexión conserva lo
+ * ya cargado como «no definitivo» (RN-07). La cuenta, el tema y la sesión viven en `/cuenta`.
  */
 @Component({
   selector: 'app-inicio-cliente',
   imports: [
     IonContent,
+    IonFooter,
     RouterLink,
-    FormsModule,
-    LogoComponent,
-    Card,
     ButtonDirective,
-    ConfirmDialog,
     Message,
-    SelectButton,
-    Tag,
-    VerificarCorreoComponent,
+    Skeleton,
+    LogoComponent,
+    BandaMarcaComponent,
+    BarraPestanasComponent,
+    ChipsFiltroComponent,
+    CirculoMarcaComponent,
+    HojaProductoComponent,
+    TarjetaProductoComponent,
   ],
-  providers: [ConfirmationService],
   templateUrl: './inicio-cliente.page.html',
   styleUrl: './inicio-cliente.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InicioClientePage implements OnInit {
   private readonly gestor = inject(GestorSesion);
-  private readonly actualizarUsuario = inject(ActualizarUsuarioActual);
-  private readonly cerrarSesion = inject(CerrarSesion);
+  private readonly consultarMarcas = inject(ConsultarMarcas);
+  private readonly consultarProductos = inject(ConsultarProductos);
   private readonly conectividad = inject(CONECTIVIDAD);
-  private readonly confirmacion = inject(ConfirmationService);
-  private readonly mensajes = inject(MessageService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly tema = inject(ServicioTema);
-
-  /** Tema: Automático (18:40 a 06:45 oscuro) / Claro / Oscuro (N2). */
-  protected readonly opcionesTema: { etiqueta: string; valor: PreferenciaTema }[] = [
-    { etiqueta: 'Automático', valor: 'automatico' },
-    { etiqueta: 'Claro', valor: 'claro' },
-    { etiqueta: 'Oscuro', valor: 'oscuro' },
-  ];
-  protected readonly preferenciaTema = this.tema.preferencia;
+  protected readonly opcionesDisponibilidad = OPCIONES_DISPONIBILIDAD;
+  protected readonly esqueletos = [1, 2, 3];
 
   protected readonly usuario = signal<Usuario | null>(this.gestor.actual()?.usuario ?? null);
   protected readonly enLinea = signal(true);
-  protected readonly cerrando = signal(false);
-  /** RF-USU-05: se avisa mientras `correoVerificadoEn` sea nulo (no bloquea el acceso). */
-  protected readonly sinVerificar = computed(() => {
-    const usuario = this.usuario();
-    return usuario !== null && !correoVerificado(usuario);
-  });
+  protected readonly estado = signal<Estado>('cargando');
+  protected readonly marcas = signal<readonly VistaMarca[]>([]);
+  protected readonly bloques = signal<readonly BloqueMarca[]>([]);
+  protected readonly disponibilidad = signal<Disponibilidad | null>(null);
+
+  protected readonly seleccionado = signal<VistaProducto | null>(null);
+  protected readonly hojaAbierta = signal(false);
+
   protected readonly saludo = computed(() => {
     const usuario = this.usuario();
-    return usuario ? `¡Hola, ${primerNombre(usuario)}!` : '¡Hola!';
+    return usuario ? `Hola, ${primerNombre(usuario)}` : 'Hola';
   });
+
+  /** Descarta respuestas de cargas anteriores si el Cliente cambió el filtro. */
+  private secuencia = 0;
 
   ngOnInit(): void {
     const dejarDeOirSesion = this.gestor.suscribir((sesion) =>
       this.usuario.set(sesion?.usuario ?? null),
     );
     this.destroyRef.onDestroy(dejarDeOirSesion);
+    this.destroyRef.onDestroy(() => this.secuencia++);
 
-    void this.conectividad.alCambiar((conectado) => {
-      this.enLinea.set(conectado);
-      if (conectado) void this.refrescar();
-    }).then((dejarDeOir) => this.destroyRef.onDestroy(dejarDeOir));
+    void this.conectividad
+      .alCambiar((conectado) => {
+        this.enLinea.set(conectado);
+        if (conectado && (this.estado() === 'sinConexion' || this.estado() === 'error')) {
+          void this.cargar();
+        }
+      })
+      .then((dejarDeOir) => this.destroyRef.onDestroy(dejarDeOir));
 
     void this.iniciar();
   }
 
   private async iniciar(): Promise<void> {
     this.enLinea.set(await this.conectividad.estaConectado());
-    await this.refrescar();
+    await this.cargar();
   }
 
-  /** Refresca los datos del Cliente; si la sesión terminó, el interceptor lleva al ingreso. */
-  private async refrescar(): Promise<void> {
+  protected async cargar(): Promise<void> {
+    const consulta = ++this.secuencia;
+    this.estado.set('cargando');
     try {
-      await this.actualizarUsuario.ejecutar();
-    } catch {
-      // Error temporal o sesión terminada (ya gestionada por el interceptor): se
-      // conservan los datos guardados.
+      const marcas = await this.consultarMarcas.ejecutar();
+      if (consulta !== this.secuencia) return;
+      const vistas = marcas.map(aVistaMarca);
+      this.marcas.set(vistas);
+
+      const resultados = await Promise.allSettled(
+        marcas.map((marca) =>
+          this.consultarProductos.ejecutar(
+            { ...SIN_FILTROS, marcaId: marca.id, disponibilidad: this.disponibilidad() },
+            1,
+          ),
+        ),
+      );
+      if (consulta !== this.secuencia) return;
+
+      // Si todas las consultas fallan se informa el error; si solo fallan algunas, se
+      // muestran las marcas que sí cargaron.
+      const fallidas = resultados.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (fallidas.length > 0 && fallidas.length === resultados.length) {
+        throw fallidas[0]?.reason;
+      }
+      const bloques: BloqueMarca[] = [];
+      resultados.forEach((resultado, indice) => {
+        const marca = vistas[indice];
+        if (resultado.status !== 'fulfilled' || !marca || resultado.value.elementos.length === 0) {
+          return;
+        }
+        bloques.push({
+          marca,
+          total: resultado.value.total,
+          productos: resultado.value.elementos.slice(0, PRODUCTOS_POR_CARRUSEL).map(aVistaProducto),
+        });
+      });
+      this.bloques.set(bloques);
+      this.estado.set('listo');
+    } catch (error) {
+      if (consulta !== this.secuencia) return;
+      this.bloques.set([]);
+      this.estado.set(error instanceof ErrorSinConexion ? 'sinConexion' : 'error');
     }
   }
 
-  protected elegirTema(preferencia: PreferenciaTema | null): void {
-    // El selector no permite dejar el valor vacío (allowEmpty = false), pero se protege.
-    if (preferencia) void this.tema.seleccionar(preferencia);
+  protected elegirDisponibilidad(valor: string | null): void {
+    this.disponibilidad.set(esDisponibilidad(valor) ? valor : null);
+    void this.cargar();
   }
 
-  protected confirmarCierre(): void {
-    this.confirmacion.confirm({
-      header: '¿Cerrar sesión?',
-      message: this.enLinea()
-        ? 'Tendrás que ingresar de nuevo con tu correo y tu clave.'
-        : 'No tienes conexión: para volver a ingresar necesitarás conexión a internet.',
-      icon: 'pi pi-sign-out',
-      acceptLabel: 'Cerrar sesión',
-      rejectLabel: 'Cancelar',
-      rejectButtonProps: { severity: 'secondary', outlined: true },
-      accept: () => void this.salir(),
+  protected totalEnTexto(total: number): string {
+    return `${total} ${total === 1 ? 'producto' : 'productos'}`;
+  }
+
+  /** Un círculo de marca o «Ver todo» abre Explorar con esa marca. */
+  protected verMarca(marca: VistaMarca): void {
+    void this.router.navigate(['/catalogo'], {
+      queryParams: { marca: marca.id, disponibilidad: this.disponibilidad() ?? undefined },
     });
   }
 
-  private async salir(): Promise<void> {
-    this.cerrando.set(true);
-    try {
-      await this.cerrarSesion.ejecutar();
-      this.mensajes.add({
-        severity: 'info',
-        summary: 'Sesión cerrada',
-        detail: 'Vuelve pronto.',
-        life: 3000,
-      });
-      await this.router.navigateByUrl('/bienvenida', { replaceUrl: true });
-    } finally {
-      this.cerrando.set(false);
-    }
+  protected abrirDetalle(producto: VistaProducto): void {
+    this.seleccionado.set(producto);
+    this.hojaAbierta.set(true);
   }
 }
