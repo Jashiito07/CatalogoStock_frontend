@@ -333,10 +333,12 @@ npm run demo                       # http://127.0.0.1:4300 (PUERTO, BACKEND_URL 
 cloudflared tunnel --url http://127.0.0.1:4300
 ```
 
-Variables de `npm run demo`: `PUERTO` (4300), `BACKEND_URL` (`http://127.0.0.1:3100`) y
-`RAIZ` (carpeta del build). El servidor escucha solo en `127.0.0.1`, reenvía `/api/` al
-backend (con `X-Forwarded-For`/`X-Forwarded-Proto`, y 502 si el backend no responde) y solo
-registra método, ruta sin parámetros y estado. Sus pruebas: `npm run test:scripts`.
+Variables de `npm run demo`: `PUERTO` (4300), `BACKEND_URL` (`http://127.0.0.1:3100`),
+`RAIZ` (carpeta del build) y `ESCUCHAR` (`127.0.0.1`). Por defecto el servidor escucha solo
+en `127.0.0.1`; con `ESCUCHAR=0.0.0.0` se abre a la red local (modo Wi-Fi de la presentación,
+`iniciar-presentacion.ps1 -Red`; solo admite direcciones IP). Reenvía `/api/` al backend (con
+`X-Forwarded-For`/`X-Forwarded-Proto`, y 502 si el backend no responde) y solo registra
+método, ruta sin parámetros y estado. Sus pruebas: `npm run test:scripts`.
 
 Advertencias:
 
