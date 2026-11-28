@@ -1,14 +1,39 @@
-﻿// LÃ³gica del servidor de demostraciÃ³n (sin dependencias): archivos estÃ¡ticos de la app,
-// Â«fallbackÂ» de la SPA y proxy inverso de `/api/` hacia el backend. Se separa de
+// Lógica del servidor de demostración (sin dependencias): archivos estáticos de la app,
+// «fallback» de la SPA y proxy inverso de `/api/` hacia el backend. Se separa de
 // `servidor-demo.mjs` para poder probarla con Vitest (`npm run test:scripts`).
 //
-// Seguridad: escucha solo en 127.0.0.1 (lo publica el tÃºnel), no sale de la carpeta del
-// build y NUNCA registra cuerpos, cabeceras ni parÃ¡metros de la URL.
+// Seguridad: por defecto escucha solo en 127.0.0.1 (lo publica el túnel); con ESCUCHAR se
+// abre a la red local para la presentación por Wi-Fi. No sale de la carpeta del build y
+// NUNCA registra cuerpos, cabeceras ni parámetros de la URL.
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import http from 'node:http';
 import https from 'node:https';
+import net from 'node:net';
 import path from 'node:path';
+
+export const DIRECCION_POR_DEFECTO = '127.0.0.1';
+
+/**
+ * Dirección en la que escucha el servidor (variable ESCUCHAR).
+ * Vacía o ausente: 127.0.0.1, solo este equipo. `0.0.0.0` abre el servidor a la red local
+ * (modo Wi-Fi de la presentación, `iniciar-presentacion.ps1 -Red`). Solo admite direcciones
+ * IP, para que un valor mal escrito no termine escuchando donde no se esperaba.
+ * @param {string | undefined} valor
+ * @returns {string}
+ */
+export function direccionEscucha(valor) {
+  const direccion = (valor ?? '').trim() || DIRECCION_POR_DEFECTO;
+  if (net.isIP(direccion) === 0) {
+    throw new Error('ESCUCHAR debe ser una dirección IP, por ejemplo 127.0.0.1 o 0.0.0.0.');
+  }
+  return direccion;
+}
+
+/** `true` si la dirección solo acepta conexiones de este mismo equipo. */
+export function esSoloLocal(direccion) {
+  return direccion === '::1' || direccion.startsWith('127.');
+}
 
 export const TIPOS_MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -44,7 +69,7 @@ const CABECERAS_SEGURIDAD = {
   'X-Frame-Options': 'DENY',
 };
 
-// Cabeceras que no se reenvÃ­an entre saltos (RFC 9110 Â§7.6.1).
+// Cabeceras que no se reenvían entre saltos (RFC 9110 §7.6.1).
 const POR_SALTO = new Set([
   'connection',
   'keep-alive',
@@ -56,7 +81,7 @@ const POR_SALTO = new Set([
   'upgrade',
 ]);
 
-/** Tipo MIME segÃºn la extensiÃ³n; `application/octet-stream` si no se conoce. */
+/** Tipo MIME según la extensión; `application/octet-stream` si no se conoce. */
 export function tipoMime(archivo) {
   return TIPOS_MIME[path.extname(archivo).toLowerCase()] ?? 'application/octet-stream';
 }
@@ -66,14 +91,14 @@ export function tieneHash(archivo) {
   return /-[A-Za-z0-9_-]{8}\.[A-Za-z0-9]+$/u.test(path.basename(archivo));
 }
 
-/** Cabecera Cache-Control: larga con hash; `no-cache` para `index.html` y lo demÃ¡s. */
+/** Cabecera Cache-Control: larga con hash; `no-cache` para `index.html` y lo demás. */
 export function cacheControl(archivo) {
   return tieneHash(archivo) ? CACHE_CON_HASH : CACHE_SIN_CACHE;
 }
 
 /**
  * Convierte la ruta de la URL en una ruta dentro de `raiz`.
- * Devuelve `{ ruta }`, o `{ error: 400 | 403 }` si es invÃ¡lida o intenta salir de la carpeta.
+ * Devuelve `{ ruta }`, o `{ error: 400 | 403 }` si es inválida o intenta salir de la carpeta.
  */
 export function resolverRuta(raiz, rutaUrl) {
   let decodificada;
@@ -119,7 +144,7 @@ async function esArchivo(ruta) {
 async function servirEstatico(req, res, raiz, pathname) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
-    responderTexto(res, 405, 'MÃ©todo no permitido', 'text/plain; charset=utf-8');
+    responderTexto(res, 405, 'Método no permitido', 'text/plain; charset=utf-8');
     return;
   }
   const resuelta = resolverRuta(raiz, pathname);
@@ -127,21 +152,21 @@ async function servirEstatico(req, res, raiz, pathname) {
     responderTexto(
       res,
       resuelta.error,
-      resuelta.error === 403 ? 'Prohibido' : 'Solicitud invÃ¡lida',
+      resuelta.error === 403 ? 'Prohibido' : 'Solicitud inválida',
       'text/plain; charset=utf-8',
     );
     return;
   }
   let archivo = resuelta.ruta;
   if (!(await esArchivo(archivo))) {
-    // Una ruta con extensiÃ³n que no existe es un 404 real; el resto son rutas de la SPA.
+    // Una ruta con extensión que no existe es un 404 real; el resto son rutas de la SPA.
     if (path.extname(pathname) !== '') {
       responderTexto(res, 404, 'No encontrado', 'text/plain; charset=utf-8');
       return;
     }
     archivo = path.join(path.resolve(raiz), 'index.html');
     if (!(await esArchivo(archivo))) {
-      responderTexto(res, 404, 'Falta index.html: ejecuta Â«npm run build:demoÂ».', 'text/plain; charset=utf-8');
+      responderTexto(res, 404, 'Falta index.html: ejecuta «npm run build:demo».', 'text/plain; charset=utf-8');
       return;
     }
   }
@@ -206,11 +231,11 @@ function reenviarAlBackend(req, res, destino, timeoutMs) {
       502,
       'BACKEND_NO_DISPONIBLE',
       tiempo
-        ? 'El servidor no respondiÃ³ a tiempo. IntÃ©ntalo de nuevo en unos minutos.'
-        : 'No se pudo conectar con el servidor. IntÃ©ntalo de nuevo en unos minutos.',
+        ? 'El servidor no respondió a tiempo. Inténtalo de nuevo en unos minutos.'
+        : 'No se pudo conectar con el servidor. Inténtalo de nuevo en unos minutos.',
     );
   });
-  // Si el visitante corta la peticiÃ³n, se corta tambiÃ©n hacia el backend.
+  // Si el visitante corta la petición, se corta también hacia el backend.
   res.on('close', () => {
     if (!res.writableEnded) proxy.destroy();
   });
@@ -219,7 +244,7 @@ function reenviarAlBackend(req, res, destino, timeoutMs) {
 }
 
 /**
- * Crea el servidor (sin escuchar todavÃ­a).
+ * Crea el servidor (sin escuchar todavía).
  * @param {{ raiz: string, backendUrl?: string, timeoutMs?: number, registrar?: (linea: string) => void }} opciones
  */
 export function crearServidor({
@@ -234,17 +259,17 @@ export function crearServidor({
   }
   return http.createServer((req, res) => {
     for (const [nombre, valor] of Object.entries(CABECERAS_SEGURIDAD)) res.setHeader(nombre, valor);
-    // Solo mÃ©todo, ruta sin parÃ¡metros y estado.
+    // Solo método, ruta sin parámetros y estado.
     let pathname = '/';
     try {
       pathname = new URL(req.url ?? '/', 'http://local').pathname;
     } catch {
-      /* se atiende como Â«/Â» y fallarÃ¡ mÃ¡s abajo */
+      /* se atiende como «/» y fallará más abajo */
     }
     res.on('close', () => registrar(`${req.method} ${pathname} ${res.statusCode}`));
     const atender = esRutaApi(pathname)
       ? Promise.resolve(reenviarAlBackend(req, res, destino, timeoutMs))
       : servirEstatico(req, res, raiz, pathname);
-    atender.catch(() => responderJson(res, 500, 'ERROR_INTERNO', 'Error interno del servidor de demostraciÃ³n.'));
+    atender.catch(() => responderJson(res, 500, 'ERROR_INTERNO', 'Error interno del servidor de demostración.'));
   });
 }

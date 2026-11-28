@@ -1,4 +1,4 @@
-﻿// Pruebas del servidor de demostraciÃ³n (`npm run test:scripts`).
+// Pruebas del servidor de demostración (`npm run test:scripts`).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
@@ -6,7 +6,15 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { cacheControl, crearServidor, resolverRuta, tieneHash, tipoMime } from './servidor-demo-nucleo.mjs';
+import {
+  cacheControl,
+  crearServidor,
+  direccionEscucha,
+  esSoloLocal,
+  resolverRuta,
+  tieneHash,
+  tipoMime,
+} from './servidor-demo-nucleo.mjs';
 
 function escuchar(servidor) {
   return new Promise((resolver) => {
@@ -21,7 +29,7 @@ function cerrar(servidor) {
   });
 }
 
-/** PeticiÃ³n HTTP cruda (para rutas con `..` que `fetch` normalizarÃ­a). */
+/** Petición HTTP cruda (para rutas con `..` que `fetch` normalizaría). */
 function crudo(puerto, linea) {
   return new Promise((resolver, rechazar) => {
     const socket = net.connect(puerto, '127.0.0.1', () => {
@@ -45,7 +53,7 @@ describe('utilidades', () => {
     expect(tipoMime('x.desconocido')).toBe('application/octet-stream');
   });
 
-  it('cachÃ© larga solo con hash; index.html sin cachÃ©', () => {
+  it('caché larga solo con hash; index.html sin caché', () => {
     expect(tieneHash('main-ABCD1234.js')).toBe(true);
     expect(tieneHash('chunk--TEw8YCR.js')).toBe(true);
     expect(tieneHash('index.html')).toBe(false);
@@ -63,9 +71,28 @@ describe('utilidades', () => {
     expect(resolverRuta(raiz, '/a%00.js').error).toBe(400);
     expect(resolverRuta(raiz, '/%E0%A4%A').error).toBe(400);
   });
+
+  it('ESCUCHAR: por defecto solo este equipo; admite solo direcciones IP', () => {
+    expect(direccionEscucha(undefined)).toBe('127.0.0.1');
+    expect(direccionEscucha('')).toBe('127.0.0.1');
+    expect(direccionEscucha('  ')).toBe('127.0.0.1');
+    expect(direccionEscucha('0.0.0.0')).toBe('0.0.0.0');
+    expect(direccionEscucha(' 192.168.1.20 ')).toBe('192.168.1.20');
+    expect(direccionEscucha('::')).toBe('::');
+    expect(() => direccionEscucha('todas')).toThrow(/ESCUCHAR/);
+    expect(() => direccionEscucha('localhost')).toThrow(/ESCUCHAR/);
+    expect(() => direccionEscucha('0.0.0.0:4200')).toThrow(/ESCUCHAR/);
+  });
+
+  it('esSoloLocal distingue el equipo de la red local', () => {
+    expect(esSoloLocal('127.0.0.1')).toBe(true);
+    expect(esSoloLocal('::1')).toBe(true);
+    expect(esSoloLocal('0.0.0.0')).toBe(false);
+    expect(esSoloLocal('192.168.1.20')).toBe(false);
+  });
 });
 
-describe('servidor de demostraciÃ³n', () => {
+describe('servidor de demostración', () => {
   let carpeta;
   let backend;
   let puertoBackend;
@@ -123,7 +150,7 @@ describe('servidor de demostraciÃ³n', () => {
 
   const url = (ruta) => `http://127.0.0.1:${puerto}${ruta}`;
 
-  it('sirve index.html sin cachÃ© y con cabeceras de seguridad', async () => {
+  it('sirve index.html sin caché y con cabeceras de seguridad', async () => {
     const r = await fetch(url('/'));
     expect(r.status).toBe(200);
     expect(r.headers.get('content-type')).toBe('text/html; charset=utf-8');
@@ -134,7 +161,7 @@ describe('servidor de demostraciÃ³n', () => {
     expect(await r.text()).toBe('<html>app</html>');
   });
 
-  it('sirve archivos con hash con cachÃ© larga y MIME correcto', async () => {
+  it('sirve archivos con hash con caché larga y MIME correcto', async () => {
     const r = await fetch(url('/main-ABCD1234.js'));
     expect(r.headers.get('content-type')).toBe('text/javascript; charset=utf-8');
     expect(r.headers.get('cache-control')).toContain('max-age=31536000');
@@ -149,7 +176,7 @@ describe('servidor de demostraciÃ³n', () => {
     expect((await fetch(url('/falta.js'))).status).toBe(404);
   });
 
-  it('rechaza mÃ©todos no permitidos en estÃ¡ticos', async () => {
+  it('rechaza métodos no permitidos en estáticos', async () => {
     expect((await fetch(url('/'), { method: 'POST', body: 'x' })).status).toBe(405);
   });
 
@@ -166,7 +193,7 @@ describe('servidor de demostraciÃ³n', () => {
     }
   });
 
-  it('proxy: GET conserva cÃ³digo, cabeceras de respuesta y aÃ±ade X-Forwarded-*', async () => {
+  it('proxy: GET conserva código, cabeceras de respuesta y añade X-Forwarded-*', async () => {
     const r = await fetch(url('/api/v1/salud?a=1'), { headers: { Authorization: 'Bearer abc' } });
     expect(r.status).toBe(200);
     expect(r.headers.get('x-prueba')).toBe('si');
@@ -178,7 +205,7 @@ describe('servidor de demostraciÃ³n', () => {
     expect(ultimaPeticion.cabeceras.authorization).toBe('Bearer abc');
   });
 
-  it('proxy: conserva un X-Forwarded-Proto https del tÃºnel y encadena X-Forwarded-For', async () => {
+  it('proxy: conserva un X-Forwarded-Proto https del túnel y encadena X-Forwarded-For', async () => {
     await fetch(url('/api/v1/salud'), {
       headers: { 'X-Forwarded-Proto': 'https', 'X-Forwarded-For': '203.0.113.9' },
     });
@@ -198,7 +225,7 @@ describe('servidor de demostraciÃ³n', () => {
     expect(JSON.parse(ultimaPeticion.cuerpo.toString())).toEqual({ correo: 'a@b.ec', clave: 'x' });
   });
 
-  it('proxy: cuerpos grandes (5 MB, como multipart) pasan Ã­ntegros', async () => {
+  it('proxy: cuerpos grandes (5 MB, como multipart) pasan íntegros', async () => {
     const cuerpo = Buffer.alloc(5 * 1024 * 1024, 'ab');
     const r = await fetch(url('/api/v1/eco'), {
       method: 'POST',
@@ -215,7 +242,7 @@ describe('servidor de demostraciÃ³n', () => {
     expect((await fetch(url('/api/v1/nada'))).status).toBe(404);
   });
 
-  it('registra solo mÃ©todo, ruta sin parÃ¡metros y estado', async () => {
+  it('registra solo método, ruta sin parámetros y estado', async () => {
     await fetch(url('/api/v1/salud?token=VALOR-PRIVADO'), { headers: { Authorization: 'Bearer zzz' } });
     await new Promise((r) => setTimeout(r, 50));
     expect(registros).toContain('GET /api/v1/salud 200');

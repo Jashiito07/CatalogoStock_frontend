@@ -55,7 +55,9 @@ describe('BienvenidaPage (PLAN 1.6, PA-12)', () => {
     const elemento = await abrir();
 
     expect(elemento.querySelector('h1')?.textContent?.trim()).toBe('Tu catálogo, siempre contigo');
-    expect(elemento.textContent).toContain('Compra por catálogo, incluso sin conexión.');
+    expect(elemento.textContent).toContain('Explora el catálogo desde tu celular.');
+    // DEC-19: hasta que exista F4, la bienvenida no promete el uso sin conexión.
+    expect(elemento.textContent).not.toMatch(/sin conexión/i);
     const puntos = elemento.querySelectorAll('ul li');
     expect(puntos.length).toBe(3);
     for (const punto of Array.from(puntos)) {

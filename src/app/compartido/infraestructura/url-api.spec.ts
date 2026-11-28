@@ -1,4 +1,4 @@
-﻿import { resolverUrlImagen } from '../../productos/infraestructura/api-productos.http';
+import { resolverUrlImagen } from '../../productos/infraestructura/api-productos.http';
 import { resolverUrlApi, resolverUrlPanel } from './url-api';
 
 const desarrollo = {
@@ -20,7 +20,7 @@ describe('URL de la API', () => {
     );
   });
 
-  it('no cambia el host si la opciÃ³n estÃ¡ desactivada (APK red-local)', () => {
+  it('no cambia el host si la opción está desactivada (APK red-local)', () => {
     const redLocal = { ...desarrollo, apiUrl: 'http://192.168.1.20:3000/api/v1', apiEnMismoHost: false };
     expect(resolverUrlApi(redLocal, { protocol: 'http:', hostname: 'localhost' })).toBe(
       'http://192.168.1.20:3000/api/v1',
@@ -33,7 +33,7 @@ describe('URL de la API', () => {
     );
   });
 
-  it('RNF-01: en producciÃ³n exige HTTPS y nunca cambia el host', () => {
+  it('RNF-01: en producción exige HTTPS y nunca cambia el host', () => {
     const produccion = { produccion: true, apiUrl: 'https://api.ejemplo.ec/api/v1', apiEnMismoHost: true };
     expect(resolverUrlApi(produccion, { protocol: 'http:', hostname: '10.0.0.5' })).toBe(
       'https://api.ejemplo.ec/api/v1',
@@ -66,7 +66,7 @@ describe('URL del panel del Vendedor (D-37)', () => {
     );
   });
 
-  it('RNF-01: en producciÃ³n exige HTTPS', () => {
+  it('RNF-01: en producción exige HTTPS', () => {
     const produccion = { produccion: true, apiEnMismoHost: false, urlPanel: 'https://panel.ejemplo.ec' };
     expect(resolverUrlPanel(produccion, null)).toBe('https://panel.ejemplo.ec');
     expect(() => resolverUrlPanel({ ...produccion, urlPanel: 'http://panel.ejemplo.ec' }, null)).toThrow(
@@ -74,11 +74,11 @@ describe('URL del panel del Vendedor (D-37)', () => {
     );
   });
 });
-describe('URL relativa de la demostraciÃ³n (un solo origen)', () => {
+describe('URL relativa de la demostración (un solo origen)', () => {
   const demo = { produccion: true, apiUrl: '/api/v1', apiEnMismoHost: false };
   const tunel = { protocol: 'https:', hostname: 'demo.trycloudflare.com', origin: 'https://demo.trycloudflare.com' };
 
-  it('RNF-01: se resuelve contra el origen HTTPS de la pÃ¡gina', () => {
+  it('RNF-01: se resuelve contra el origen HTTPS de la página', () => {
     expect(resolverUrlApi(demo, tunel)).toBe('https://demo.trycloudflare.com/api/v1');
   });
 
@@ -87,14 +87,14 @@ describe('URL relativa de la demostraciÃ³n (un solo origen)', () => {
     expect(resolverUrlApi(demo, ubicacion)).toBe('https://demo.ec:8443/api/v1');
   });
 
-  it('RNF-01: en producciÃ³n rechaza un origen HTTP que no sea localhost', () => {
+  it('RNF-01: en producción rechaza un origen HTTP que no sea localhost', () => {
     const http = { protocol: 'http:', hostname: 'demo.ec', origin: 'http://demo.ec' };
     expect(() => resolverUrlApi(demo, http)).toThrow(/HTTPS/);
     const ip = { protocol: 'http:', hostname: '192.168.1.20', origin: 'http://192.168.1.20:4300' };
     expect(() => resolverUrlApi(demo, ip)).toThrow(/HTTPS/);
   });
 
-  it('en producciÃ³n admite HTTP solo en localhost y 127.0.0.1 (prueba local)', () => {
+  it('en producción admite HTTP solo en localhost y 127.0.0.1 (prueba local)', () => {
     const local = { protocol: 'http:', hostname: 'localhost', origin: 'http://localhost:4300' };
     expect(resolverUrlApi(demo, local)).toBe('http://localhost:4300/api/v1');
     const loopback = { protocol: 'http:', hostname: '127.0.0.1', origin: 'http://127.0.0.1:4310' };
@@ -106,25 +106,25 @@ describe('URL relativa de la demostraciÃ³n (un solo origen)', () => {
     expect(resolverUrlApi(entorno, tunel)).toBe('https://demo.trycloudflare.com/api/v1');
   });
 
-  it('falla con claridad sin origen HTTP(S) (por ejemplo sin ubicaciÃ³n)', () => {
+  it('falla con claridad sin origen HTTP(S) (por ejemplo sin ubicación)', () => {
     expect(() => resolverUrlApi(demo, null)).toThrow(/relativa/);
     expect(() =>
       resolverUrlApi(demo, { protocol: 'capacitor:', hostname: 'localhost', origin: 'capacitor://localhost' }),
     ).toThrow(/relativa/);
   });
 
-  it('una URL Â«//host/...Â» no se trata como relativa y exige HTTPS', () => {
+  it('una URL «//host/...» no se trata como relativa y exige HTTPS', () => {
     expect(() => resolverUrlApi({ ...demo, apiUrl: '//otro.ec/api/v1' }, tunel)).toThrow();
   });
 
-  it('las imÃ¡genes (/api/v1/imagenes/<archivo>) se completan con el origen de la pÃ¡gina', () => {
+  it('las imágenes (/api/v1/imagenes/<archivo>) se completan con el origen de la página', () => {
     const urlApi = resolverUrlApi(demo, tunel);
     expect(resolverUrlImagen(urlApi, '/api/v1/imagenes/a1.png')).toBe(
       'https://demo.trycloudflare.com/api/v1/imagenes/a1.png',
     );
   });
 
-  it('D-37: urlPanel vacÃ­o devuelve cadena vacÃ­a (sin panel) aunque sea producciÃ³n', () => {
+  it('D-37: urlPanel vacío devuelve cadena vacía (sin panel) aunque sea producción', () => {
     const entorno = { produccion: true, apiEnMismoHost: false, urlPanel: '' };
     expect(resolverUrlPanel(entorno, tunel)).toBe('');
     expect(resolverUrlPanel(entorno, null)).toBe('');
